@@ -1,0 +1,46 @@
+{
+  "name": "provendb-sdk-node",
+  "version": "0.1.0-alpha.0",
+  "description": "The ProvenDB SDK for Node.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "clean": "rm -rf dist",
+    "build": "npm run clean && tsc && cp -r src/proto dist",
+    "format": "prettier --config .prettierrc 'src/**/*.ts' --write",
+    "playground": "npm run build && node dist/playground.js",
+    "start": "npm run build && node dist/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "proto-gen": "protoc --plugin=protoc-gen-ts=./node_modules/.bin/protoc-gen-ts --plugin=protoc-gen-grpc=./node_modules/.bin/grpc_tools_node_protoc_plugin --ts_out=service=grpc-node:./src/proto --js_out=import_style=commonjs,binary:./src/proto --grpc_out=./src/proto -I ./src/proto anchor.proto"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SouthbankSoftware/provendb-sdk-node.git"
+  },
+  "author": "Southbank Software Pty Ltd",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/SouthbankSoftware/provendb-sdk-node/issues"
+  },
+  "homepage": "https://github.com/SouthbankSoftware/provendb-sdk-node#readme",
+  "devDependencies": {
+    "@types/node": "^14.14.32",
+    "grpc-tools": "^1.10.0",
+    "grpc_tools_node_protoc_ts": "^5.1.3",
+    "prettier": "^2.2.1",
+    "ts-loader": "^8.0.17",
+    "tslint": "^6.1.3",
+    "typescript": "^4.2.3",
+    "webpack": "^5.24.4",
+    "webpack-cli": "^4.5.0"
+  },
+  "dependencies": {
+    "@msgpack/msgpack": "^2.4.1",
+    "chainpoint-parse-v3": "npm:chainpoint-parse@^3.3.1",
+    "chainpoint-parse-v4": "npm:chainpoint-parse@^4.0.1",
+    "chainpoint-proof-json-schema-v3": "npm:chainpoint-proof-json-schema@^1.1.0",
+    "chainpoint-proof-json-schema-v4": "npm:chainpoint-proof-json-schema@^2.0.3",
+    "google-protobuf": "^3.15.5",
+    "grpc": "^1.24.5"
+  }
+}

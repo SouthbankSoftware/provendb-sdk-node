@@ -1,0 +1,280 @@
+/*
+ * proofable
+ * Copyright (C) 2020  Southbank Software Ltd.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ *
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ *
+ * @Author: guiguan
+ * @Date:   2019-08-05T10:53:28+10:00
+ * @Last modified by:   guiguan
+ * @Last modified time: 2020-09-11T09:53:55+10:00
+ */
+
+// Anchor Service continuously anchors hashes to blockchains, which is similar
+// to what Chainpoint does, but with much better performance and flexibility. It
+// supports multiple anchor types and proof formats. Digital signing can be also
+// done at the Merkle root level
+syntax = "proto3";
+
+option go_package = "github.com/SouthbankSoftware/proofable/pkg/protos/anchor";
+option java_multiple_files = true;
+option java_package = "com.provendb.anchor.proto";
+option java_outer_classname = "AnchorProto";
+option objc_class_prefix = "ACH";
+
+package anchor;
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+service AnchorService {
+  // GetAnchors gets all anchors
+  rpc GetAnchors(google.protobuf.Empty) returns (stream Anchor) {}
+  // GetAnchor gets an anchor
+  rpc GetAnchor(AnchorRequest) returns (Anchor) {}
+  // GetProof gets a proof
+  rpc GetProof(ProofRequest) returns (Proof) {}
+  // SubmitProof submits a proof for the given hash
+  rpc SubmitProof(SubmitProofRequest) returns (Proof) {}
+  // VerifyProof verifies the given proof. When the proof is unverifiable, an
+  // exception is thrown
+  rpc VerifyProof(VerifyProofRequest) returns (VerifyProofReply) {}
+  // GetBatch gets a batch
+  rpc GetBatch(BatchRequest) returns (Batch) {}
+  // SubscribeBatches subscribes to batch status updates
+  rpc SubscribeBatches(SubscribeBatchesRequest) returns (stream Batch) {}
+}
+
+// Anchor represents an anchor of a blockchain, through which a hash can be
+// anchored to that blockchain
+message Anchor {
+  // Type represents an anchor type. Please refer to this
+  // [list](https://docs.proofable.io/concepts/anchor_types.html) for all
+  // available anchor types
+  enum Type {
+    // [Ethereum](https://ethereum.org/) Rinkeby Testnet
+    ETH = 0;
+    // Ethereum Mainnet. [Ethereum](https://ethereum.org/) is the second-largest
+    // cryptocurrency
+    ETH_MAINNET = 3;
+    // [Elastos](https://www.elastos.org/), which employs a "main
+    // chain-sidechain architecture"
+    ETH_ELASTOS = 4;
+    // [GoChain](https://gochain.io/), which is scalable, low cost and energy
+    // efficient
+    ETH_GOCHAIN = 9;
+    // [Bitcoin](https://bitcoin.org/) Testnet
+    BTC = 1;
+    // Bitcoin Mainnet. [Bitcoin](https://bitcoin.org/) is the largest
+    // cryptocurrency
+    BTC_MAINNET = 5;
+    // [Chainpoint](https://chainpoint.org/)
+    CHP = 2;
+    // Hedera Testnet
+    HEDERA = 6;
+    // Hedera Mainnet. [Hedera](https://www.hedera.com/) is a DAG based
+    // blockchain that provides much better TPS than tranditional blockchains
+    HEDERA_MAINNET = 7;
+    // [Hyperledger Fabric](https://www.hyperledger.org/use/fabric), which is a
+    // modular blockchain framework for private enterprises
+    HYPERLEDGER = 8;
+  }
+  // Type is the anchor type
+  Type type = 1;
+  // Status represents an anchor's status
+  enum Status {
+    // Error means the anchor has an error
+    ERROR = 0;
+    // STOPPED means the anchor is stopped
+    STOPPED = 1;
+    // RUNNING means the anchor is running
+    RUNNING = 2;
+  }
+  // Status is the anchor status
+  Status status = 2;
+  // Error is the error message when the anchor status is ERROR
+  string error = 3;
+  // SupportedFormats are the supported proof formats of the anchor
+  repeated Proof.Format supported_formats = 4;
+}
+
+// Batch represents a batch of hashes. When hash stream comes in, Anchor Service
+// will try to process them in batches, just like blockchain processes
+// transactions in blocks. This makes utilization of expensive resources, such
+// as making Bitcoin transaction, more economic. Each batch's root hash will be
+// embedded in a transaction made to the blockchain
+message Batch {
+  // Id is the batch ID
+  string id = 1;
+  // AnchorType is the batch's anchor type
+  Anchor.Type anchor_type = 2;
+  // ProofFormat is the batch's proof format, which determines how the merkle
+  // tree is constructed for the batch.
+  Proof.Format proof_format = 3;
+  // Status represents a batch's status
+  enum Status {
+    // ERROR means the batch has an error. FLOW: * -> ERROR
+    ERROR = 0;
+    // BATCHING means the batch is batching for more hashes. FLOW: created_at ->
+    // BATCHING -> flushed_at
+    BATCHING = 1;
+    // QUEUING means the batch is queuing to be processed. FLOW: flushed_at ->
+    // QUEUING -> started_at
+    QUEUING = 2;
+    // PROCESSING means the batch is constructing merkle roots and submitting
+    // hashes. FLOW: started_at -> PROCESSING -> submitted_at
+    PROCESSING = 3;
+    // PENDING means the batch's root hash is pending to be confirmed. FLOW:
+    // submitted_at -> PENDING -> finalized_at
+    PENDING = 4;
+    // CONFIRMED means the batch's root hash is confirmed by the anchor's
+    // blockchain. FLOW: finalized_at -> CONFIRMED
+    CONFIRMED = 5;
+  }
+  // Status is the batch status. FLOW: created_at -> BATCHING -> flushed_at ->
+  // QUEUING -> started_at -> PROCESSING -> submitted_at -> PENDING ->
+  // finalized_at -> CONFIRMED / ERROR; * -> ERROR; if a batch has not yet
+  // reached PENDING and its anchor has restarted, the batch will be put back to
+  // QUEUING
+  Status status = 4;
+  // Error is the error message when status is ERROR
+  string error = 5;
+  // Size is the number of hashes contained in the batch
+  int64 size = 6;
+  // CreateAt is the batch's created at timestamp. FLOW: created_at -> BATCHING
+  google.protobuf.Timestamp created_at = 7;
+  // FlushedAt is the batch's flushed at timestamp. FLOW: BATCHING -> flushed_at
+  // -> QUEUING
+  google.protobuf.Timestamp flushed_at = 8;
+  // StartedAt is the batch's started at timestamp. FLOW: QUEUING -> started_at
+  // -> PROCESSING
+  google.protobuf.Timestamp started_at = 9;
+  // SubmittedAt is the batch's submitted at timestamp. FLOW: PROCESSING ->
+  // submitted_at -> PENDING
+  google.protobuf.Timestamp submitted_at = 10;
+  // FinalizedAt is the batch's finalized at timestamp. FLOW: * -> finalized_at
+  // -> CONFIRMED / ERROR. NOTE: this is not the real block confirmed time, use
+  // the timestamp in the batch data instead
+  google.protobuf.Timestamp finalized_at = 11;
+  // Hash is the batch's root hash
+  string hash = 12;
+  // Data is the batch data in JSON
+  string data = 13;
+}
+
+// Proof represents a blockchain proof of a hash, which is a Merkle path from
+// the hash to the root hash of the proof's batch
+message Proof {
+  // Hash is the hash the proof is proving for
+  string hash = 1;
+  // BatchId is the proof's batch ID
+  string batch_id = 2;
+  // AnchorType is the proof's anchor type
+  Anchor.Type anchor_type = 3;
+  // BatchStatus is the proof's batch status
+  Batch.Status batch_status = 4;
+  // Format represents a proof format
+  enum Format {
+    // CHP_PATH means Chainpoint Path format, which is the format used by
+    // Chainpoint
+    CHP_PATH = 0;
+    // ETH_TRIE means Ethereum Trie format
+    ETH_TRIE = 1;
+    // CHP_PATH_SIGNED means signed Chainpoint Path format
+    CHP_PATH_SIGNED = 2;
+    // ETH_TRIE_SIGNED means signed Ethereum Trie format
+    ETH_TRIE_SIGNED = 3;
+  }
+  // Format is the proof format
+  Format format = 5;
+  // Data is the proof data in base64
+  string data = 6;
+  // Batch is the proof's batch detail
+  Batch batch = 7;
+}
+
+// AnchorRequest represents a request to get information for the given anchor
+// type
+message AnchorRequest {
+  // Type is the anchor type
+  Anchor.Type type = 1;
+}
+
+// ProofRequest represents a proof request
+message ProofRequest {
+  // Hash is the hash the proof is proving for
+  string hash = 1;
+  // BatchId is the proof's batch ID
+  string batch_id = 2;
+  // AnchorType is the proof's anchor type
+  Anchor.Type anchor_type = 3;
+  // WithBatch indicates whether to include the proof's batch detail
+  bool with_batch = 4;
+}
+
+// SubmitProofRequest represents a submit proof request
+message SubmitProofRequest {
+  // Hash is the hash to be submitted
+  string hash = 1;
+  // AnchorType is the anchor type to be used
+  Anchor.Type anchor_type = 2;
+  // Format is the proof format to be used
+  Proof.Format format = 3;
+  // SkipBatching indicates whether to skip batching and submit a proof for the
+  // hash directly
+  bool skip_batching = 4;
+  // WithBatch indicates whether to include the batch detail in the reply
+  bool with_batch = 5;
+}
+
+// VerifyProofRequest represents a verify proof request
+message VerifyProofRequest {
+  // AnchorType is the proof's anchor type
+  Anchor.Type anchor_type = 1;
+  // Format is the proof format. If skipping the signature checking is desired,
+  // please use the corresponding non-signed format, eg. use CHP_PATH instead of
+  // CHP_PATH_SIGNED in request
+  Proof.Format format = 2;
+  // Data is the proof data in base64
+  string data = 3;
+}
+
+// VerifyProofReply represents a verify proof reply
+message VerifyProofReply {
+  // Verified indicates whether the proof is verified
+  bool verified = 1;
+  // Erorr is the error message when the proof is falsified
+  string error = 2;
+  // ProvenHash is the hash the proof is proving for
+  string provenHash = 3;
+}
+
+// BatchRequest represents a batch request
+message BatchRequest {
+  // BatchId is the batch ID
+  string batch_id = 1;
+  // AnchorType is the batch's anchor type
+  Anchor.Type anchor_type = 2;
+}
+
+// SubscribeBatchesRequest represents a subscription request for batch
+// information
+message SubscribeBatchesRequest {
+  // Filter is the batch filter. When nil, all batches of all anchors will be
+  // subscribed; otherwise, only the batches of the given anchor will be
+  // subscribed; if batch_id is non-empty, only the matched batch will be
+  // subscribed
+  BatchRequest filter = 1;
+}
