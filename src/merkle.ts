@@ -160,12 +160,13 @@ export class MerkleTree {
         isHashed: boolean,
         proof: Proof,
         label: string
-    ) {
+    ): Proof {
         switch (proof.format) {
             // This is a V3 proof.
             case proto.Proof.Format.CHP_PATH: {
                 let v3: V3.Proof = V3.parse(proof.data);
-                return this.getChainpointV3Path(leaf, isHashed, v3, label);
+                proof.data = this.getChainpointV3Path(leaf, isHashed, v3, label);
+                return proof;
             }
             default:
                 throw new Error("format not supported");
