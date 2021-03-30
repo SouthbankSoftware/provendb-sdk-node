@@ -88,6 +88,21 @@ export function getProofWithReturnBatch(returnBatch: boolean): GetProofOption {
     }
 }
 
+export type SubscribeBatchesOption = (option: SubscribeBatchesOptions) => void;
+
+export interface SubscribeBatchesOptions {
+    filter?: {
+        batchId: string,
+        anchorType: anchor.Anchor.Type
+    }
+}
+
+export function subscribeBatchesWithFilter(filter: { batchId: string, anchorType: anchor.Anchor.Type}): SubscribeBatchesOption {
+    return function(options: SubscribeBatchesOptions) {
+        options.filter = filter;
+    }
+}
+
 export class Client {
 
     constructor(private client: service.AnchorServiceClient) {}
@@ -152,29 +167,42 @@ export class Client {
             .setSkipBatching(options.skipBatching)
             .setWithBatch(options.returnBatch)
         this.client.submitProof(req, callback);
-    }  
+    }
 
-    public subscribeProof(proof: anchor.Proof, callback: (err: ServiceError | null, res: anchor.Proof) => void) {
-        let req = new anchor.SubscribeBatchesRequest()
-            .setFilter(new anchor.BatchRequest()
-                .setAnchorType(proof.getAnchorType())
-                .setBatchId(proof.getBatchId()));
+    public subscribeBatches(callback: (err: ServiceError | null, res: anchor.Batch, ) => void, ...opts: SubscribeBatchesOption[]) {
+        let options: SubscribeBatchesOptions = {
+            // No filter default.
+            filter: undefined
+        }
+        opts.forEach(o => o(options));
+        let req = new anchor.SubscribeBatchesRequest();
+        if (options.filter) {
+            req.setFilter(new anchor.BatchRequest()
+                .setBatchId(options.filter.batchId)
+                .setAnchorType(options.filter.anchorType));
+        }
         let res: ClientReadableStream<anchor.Batch> = this.client.subscribeBatches(req);
-        
         res.on("data", (data: anchor.Batch) => {
-            if (data.getStatus() === proof.getBatchStatus()) {
-                return;
-            }
-            if (data.getStatus() === anchor.Batch.Status.ERROR) {
-                callback(new Error(data.getError()), new anchor.Proof());
-                return;
-            }
-            // Retrieve the updated proof
-            this.getProof(proof.getHash(), proof.getBatchId(), proof.getAnchorType(), callback, getProofWithReturnBatch(true));
+            callback(null, data);
         });
         res.on("error", (err: Error) => {
-            callback(err, new anchor.Proof())
+            callback(err, new anchor.Batch())
         })
+    }
+
+    public subscribeProof(proof: anchor.Proof, callback: (err: ServiceError | null, res: anchor.Proof) => void) {
+        this.subscribeBatches((err: ServiceError | null, res: anchor.Batch) => {
+            if (err) {
+                callback(err, new anchor.Proof());
+            } else {
+                if (res.getStatus() === anchor.Batch.Status.ERROR) {
+                    callback(new Error(res.getError()), new anchor.Proof());
+                    return;
+                }
+                // Retrieve the updated proof
+                this.getProof(proof.getHash(), proof.getBatchId(), proof.getAnchorType(), callback, getProofWithReturnBatch(true));
+            }
+        }, subscribeBatchesWithFilter({batchId: proof.getBatchId(), anchorType: proof.getAnchorType()}));
     }
 }
 
