@@ -6,6 +6,7 @@ import fs from "fs";
  * Representation of a confirmed and complete proof.
  */
  export interface Proof {
+    id: string;
     // Metadata about the transaction.
     metadata: Map<string,any>;
     // The proof data (receipt).
@@ -30,6 +31,12 @@ export interface File {
      * The tree data.
      */
     data: string[][];
+}
+
+export interface Path {
+    l?: string;
+    r?: string;
+    op?: string;
 }
 
 /**
@@ -191,14 +198,14 @@ export class Tree {
      * Retrieves the path to the root from the leaf.
      * @param leaf the leaf
      */
-    getPath(leaf: Buffer, isHashed: boolean): any[] {
+    getPath(leaf: Buffer, isHashed: boolean): Path[] {
         let hash = "";
         if (isHashed) {
             hash = leaf.toString();
         } else {
             hash = crypto.createHash(this.algorithm).update(leaf).digest("hex");
         }
-        let path: any[] = [];
+        let path: Path[] = [];
         // Find the leaf first
         let index = -1;
         for (let i = 0; i < this.layers[0].length; i++) {

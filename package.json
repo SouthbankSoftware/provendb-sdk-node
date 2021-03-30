@@ -39,10 +39,6 @@
     "@grpc/grpc-js": "^1.2.12",
     "@grpc/proto-loader": "^0.5.6",
     "@msgpack/msgpack": "^2.4.1",
-    "chainpoint-parse-v3": "npm:chainpoint-parse@^3.3.1",
-    "chainpoint-parse-v4": "npm:chainpoint-parse@^4.0.1",
-    "chainpoint-proof-json-schema-v3": "npm:chainpoint-proof-json-schema@^1.1.0",
-    "chainpoint-proof-json-schema-v4": "npm:chainpoint-proof-json-schema@^2.0.3",
     "google-protobuf": "^3.15.5",
     "grpc": "^1.24.5"
   }
