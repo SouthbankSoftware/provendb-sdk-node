@@ -1,7 +1,8 @@
 import * as anchor from "./anchor_pb";
 import * as service from "./anchor_grpc_pb";
 import grpc from "@grpc/grpc-js";
-import { ServiceError } from "grpc";
+import { ClientReadableStream, ServiceError } from "grpc";
+import * as google_protobuf_empty_pb from "google-protobuf/google/protobuf/empty_pb";
 
 export type ClientOption = (options: ClientOptions) => void;
 
@@ -75,9 +76,64 @@ export function submitProofWithReturnBatch(returnBatch: boolean): SubmitProofOpt
     }
 }
 
+export interface GetProofOptions {
+    returnBatch: boolean;
+}
+
+export type GetProofOption = (option: GetProofOptions) => void;
+
+export function getProofWithReturnBatch(returnBatch: boolean): GetProofOption {
+    return function(options: GetProofOptions) {
+        options.returnBatch = returnBatch;
+    }
+}
+
 export class Client {
 
     constructor(private client: service.AnchorServiceClient) {}
+
+    public getAnchors(callback: (err: ServiceError | null, res: anchor.Anchor[]) => void) {
+        let res: ClientReadableStream<anchor.Anchor> = this.client.getAnchors(new google_protobuf_empty_pb.Empty());
+        let anchors: anchor.Anchor[] = [];
+        res.on("data", (data: anchor.Anchor) => {
+            anchors.push();
+        })
+        res.on("end", () => {
+            callback(null, anchors);
+        });
+        res.on("error", (err: Error) => {
+            callback(err, anchors);
+        });
+    }
+
+    public getAnchor(anchorType: anchor.Anchor.Type, callback: (err: ServiceError | null, res: anchor.Anchor) => void) {
+        let req: anchor.AnchorRequest = new anchor.AnchorRequest().setType(anchorType);
+        this.client.getAnchor(req, callback);
+    }
+
+    public getBatch(batchId: string, anchorType: anchor.Anchor.Type, callback: (err: ServiceError | null, res: anchor.Batch) => void) {
+        let req: anchor.BatchRequest = new anchor.BatchRequest()
+            .setBatchId(batchId)
+            .setAnchorType(anchorType);
+        this.client.getBatch(req, callback);
+    }
+
+    public getProof(hash: string, 
+                    batchId: string, 
+                    anchorType: anchor.Anchor.Type, 
+                    callback: (err: ServiceError | null, res: anchor.Proof) => void, 
+                    ...opts: GetProofOption[]) {
+        let options: GetProofOptions = {
+            returnBatch: true
+        }
+        opts.forEach(o => o(options));
+        let req = new anchor.ProofRequest()
+            .setHash(hash)
+            .setBatchId(batchId)
+            .setAnchorType(anchorType)
+            .setWithBatch(options.returnBatch);
+        this.client.getProof(req, callback);
+    }
 
     public submitProof(hash: string, callback: (err: ServiceError | null, res: anchor.Proof) => void, ...opts: SubmitProofOption[]) {
         // Set the default options
@@ -97,5 +153,28 @@ export class Client {
             .setWithBatch(options.returnBatch)
         this.client.submitProof(req, callback);
     }  
+
+    public subscribeProof(proof: anchor.Proof, callback: (err: ServiceError | null, res: anchor.Proof) => void) {
+        let req = new anchor.SubscribeBatchesRequest()
+            .setFilter(new anchor.BatchRequest()
+                .setAnchorType(proof.getAnchorType())
+                .setBatchId(proof.getBatchId()));
+        let res: ClientReadableStream<anchor.Batch> = this.client.subscribeBatches(req);
+        
+        res.on("data", (data: anchor.Batch) => {
+            if (data.getStatus() === proof.getBatchStatus()) {
+                return;
+            }
+            if (data.getStatus() === anchor.Batch.Status.ERROR) {
+                callback(new Error(data.getError()), new anchor.Proof());
+                return;
+            }
+            // Retrieve the updated proof
+            this.getProof(proof.getHash(), proof.getBatchId(), proof.getAnchorType(), callback, getProofWithReturnBatch(true));
+        });
+        res.on("error", (err: Error) => {
+            callback(err, new anchor.Proof())
+        })
+    }
 }
 
