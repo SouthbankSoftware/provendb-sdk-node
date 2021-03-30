@@ -204,5 +204,22 @@ export class Client {
             }
         }, subscribeBatchesWithFilter({batchId: proof.getBatchId(), anchorType: proof.getAnchorType()}));
     }
+
+    public verifyProof(data: string, 
+                        anchorType: anchor.Anchor.Type, 
+                        format: anchor.Proof.Format, 
+                        callback: (err: ServiceError | null, res: boolean) => void) {
+        let req: anchor.VerifyProofRequest = new anchor.VerifyProofRequest()
+            .setData(data)
+            .setAnchorType(anchorType)
+            .setFormat(format);
+        this.client.verifyProof(req, (err: ServiceError | null, res: anchor.VerifyProofReply) => {
+            if (err) {
+                callback(err, false);
+            } else {
+                callback(null, res.getVerified())
+            }
+        })
+    }
 }
 
