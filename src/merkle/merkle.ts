@@ -1,14 +1,13 @@
 import crypto from "crypto";
 import fs from "fs";
 
-
 /**
  * Representation of a confirmed and complete proof.
  */
- export interface Proof {
+export interface Proof {
     id: string;
     // Metadata about the transaction.
-    metadata: Map<string,any>;
+    metadata: Map<string, any>;
     // The proof data (receipt).
     data: any;
 }
@@ -36,7 +35,32 @@ export interface File {
 export interface Path {
     l?: string;
     r?: string;
-    op?: string;
+}
+
+/**
+ * Imports the given merkle file.
+ * @param file the merkle file
+ */
+export function importTree(file: File): Tree {
+    return new Tree(file.algorithm, file.data, file.proofs);
+}
+
+/**
+ * Syncronously import a merkle tree from file at the given path.
+ * @param path the path to the file.
+ */
+export function importTreeSync(path: string): Tree {
+    var raw = fs.readFileSync(path);
+    var file: File = JSON.parse(raw.toString());
+    return importTree(file);
+}
+
+/**
+ * Constructs a new builder.
+ * @param algorithm the algorithm to use for hashing.
+ */
+export function newBuilder(algorithm: string): Builder {
+    return new Builder(algorithm);
 }
 
 /**
@@ -60,32 +84,6 @@ export class Tree {
         for (let i = 1; i < layers.length; i++) {
             this.nodes += layers[i].length;
         }
-    }
-
-    /**
-     * Imports the given merkle file.
-     * @param file the merkle file
-     */
-    static import(file: File): Tree {
-        return new Tree(file.algorithm, file.data, file.proofs);
-    }
-
-    /**
-     * Syncronously import a merkle tree from file at the given path.
-     * @param path the path to the file.
-     */
-    static importSync(path: string): Tree {
-        var raw = fs.readFileSync(path);
-        var file: File = JSON.parse(raw.toString());
-        return Tree.import(file);
-    }
-
-    /**
-     * Constructs a new builder.
-     * @param algorithm the algorithm to use for hashing.
-     */
-    static builder(algorithm: string): Builder {
-        return new Builder(algorithm);
     }
 
     /**
@@ -148,7 +146,12 @@ export class Tree {
             // This is a V3 proof.
             case proto.Proof.Format.CHP_PATH: {
                 let v3: V3.Proof = V3.parse(proof.data);
-                proof.data = this.getChainpointV3Path(leaf, isHashed, v3, label);
+                proof.data = this.getChainpointV3Path(
+                    leaf,
+                    isHashed,
+                    v3,
+                    label
+                );
                 return proof;
             }
             default:
@@ -221,13 +224,13 @@ export class Tree {
         // Loop through each layer and get the index pair. Skip the root layer.
         for (let i = 0; i < this.layers.length - 1; i++) {
             let layer = this.layers[i];
-            let isRight = (index % 2) !== 0
+            let isRight = index % 2 !== 0;
             if (isRight) {
                 path.push({ l: layer[index - 1] });
             } else {
                 path.push({ r: layer[index + 1] });
             }
-            index = index / 2 | 0;
+            index = (index / 2) | 0;
         }
         return path;
     }
