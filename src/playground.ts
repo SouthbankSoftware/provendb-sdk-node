@@ -1,3 +1,4 @@
+
 import { MerkleFile, MerkleTree } from './merkle';
 
 let file = {

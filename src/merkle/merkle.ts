@@ -1,19 +1,21 @@
 import crypto from "crypto";
 import fs from "fs";
-import {
-    AnchorOptions,
-    ProofHandle,
-    newClient,
-    proto,
-    service,
-} from "./anchor";
-import { V3 } from "./chainpoint/v3";
-import { Proof } from "./proof";
+
+
+/**
+ * Representation of a confirmed and complete proof.
+ */
+ export interface Proof {
+    // Metadata about the transaction.
+    metadata: Map<string,any>;
+    // The proof data (receipt).
+    data: any;
+}
 
 /**
  * MerkleFile represents an exported file of a merkle tree.
  */
-export interface MerkleFile {
+export interface File {
     /**
      * The algorithm used to construct the tree.
      */
@@ -33,7 +35,7 @@ export interface MerkleFile {
 /**
  * Represents an entire Merkle tree.
  */
-export class MerkleTree {
+export class Tree {
     private nodes = 0;
 
     /**
@@ -57,26 +59,26 @@ export class MerkleTree {
      * Imports the given merkle file.
      * @param file the merkle file
      */
-    static import(file: MerkleFile): MerkleTree {
-        return new MerkleTree(file.algorithm, file.data, file.proofs);
+    static import(file: File): Tree {
+        return new Tree(file.algorithm, file.data, file.proofs);
     }
 
     /**
      * Syncronously import a merkle tree from file at the given path.
      * @param path the path to the file.
      */
-    static importSync(path: string): MerkleTree {
+    static importSync(path: string): Tree {
         var raw = fs.readFileSync(path);
-        var file: MerkleFile = JSON.parse(raw.toString());
-        return MerkleTree.import(file);
+        var file: File = JSON.parse(raw.toString());
+        return Tree.import(file);
     }
 
     /**
      * Constructs a new builder.
      * @param algorithm the algorithm to use for hashing.
      */
-    static builder(algorithm: string): MerkleTreeBuilder {
-        return new MerkleTreeBuilder(algorithm);
+    static builder(algorithm: string): Builder {
+        return new Builder(algorithm);
     }
 
     /**
@@ -84,7 +86,7 @@ export class MerkleTree {
      * @param path the path including filename to export to.
      */
     exportSync(path: string) {
-        var file: MerkleFile = {
+        var file: File = {
             algorithm: this.algorithm,
             proofs: this.proofs,
             data: this.layers,
@@ -96,34 +98,8 @@ export class MerkleTree {
      * Adds a confirmed proof to this tree.
      * @param proof the proof to add.
      */
-    addProof(proof: Proof) {
+    addProof(id: string, proof: Proof) {
         this.proofs.push(proof);
-    }
-
-    /**
-     * Submits a proof for this tree. Although the proof is returned in the callback,
-     * it is also set automitcally for this tree once received.
-     * @param options anchor grpc options
-     * @param anchorType the blockchain to anchor to
-     */
-    async createProof(
-        options: AnchorOptions,
-        anchorType: proto.Anchor.Type
-    ): Promise<ProofHandle> {
-        return new Promise<ProofHandle>((res, rej) => {
-            let client: service.AnchorServiceClient = newClient(options);
-            // Submit the proof
-            let spr: proto.SubmitProofRequest = new proto.SubmitProofRequest()
-                .setAnchorType(anchorType)
-                .setHash(this.getRoot());
-            client.submitProof(spr, (err, proof) => {
-                if (err) {
-                    rej(err);
-                } else {
-                    res(new ProofHandle(options, proof));
-                }
-            });
-        });
     }
 
     /**
@@ -349,7 +325,7 @@ export class Writer {
 /**
  * A builder to dynamically construct a new Merkle tree.
  */
-export class MerkleTreeBuilder {
+export class Builder {
     private layers: string[][] = [];
 
     constructor(private algorithm: string) {
@@ -360,7 +336,7 @@ export class MerkleTreeBuilder {
      * Adds a single leaf to the tree.
      * @param data the data to add.
      */
-    add(data: Buffer): MerkleTreeBuilder {
+    add(data: Buffer): Builder {
         this.layers[0].push(this.createHash(data));
         return this;
     }
@@ -369,7 +345,7 @@ export class MerkleTreeBuilder {
      * Adds an array of leaves to the tree.
      * @param data the array of data to add.
      */
-    addBatch(data: Buffer[]): MerkleTreeBuilder {
+    addBatch(data: Buffer[]): Builder {
         data.forEach((d) => {
             this.add(d);
         });
@@ -396,10 +372,10 @@ export class MerkleTreeBuilder {
     /**
      * Builds the merkle tree.
      */
-    build(): MerkleTree {
+    build(): Tree {
         // Construct from the leaves
         this._build(this.layers[0]);
-        return new MerkleTree(this.algorithm, this.layers);
+        return new Tree(this.algorithm, this.layers);
     }
 
     private _build(nodes: string[]) {
