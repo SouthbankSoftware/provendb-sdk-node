@@ -24,6 +24,7 @@
   },
   "homepage": "https://github.com/SouthbankSoftware/provendb-sdk-node#readme",
   "devDependencies": {
+    "@types/google-protobuf": "^3.7.4",
     "@types/node": "^14.14.32",
     "grpc-tools": "^1.10.0",
     "grpc_tools_node_protoc_ts": "^5.1.3",
