@@ -1,7 +1,6 @@
 import * as anchor from "./anchor_pb";
 import * as service from "./anchor_grpc_pb";
-import grpc from "@grpc/grpc-js";
-import { ClientReadableStream, ServiceError } from "grpc";
+import grpc, { ClientReadableStream, ServiceError } from "@grpc/grpc-js";
 import * as google_protobuf_empty_pb from "google-protobuf/google/protobuf/empty_pb";
 
 export type ClientOption = (options: ClientOptions) => void;
@@ -130,7 +129,7 @@ export class Client {
         res.on("end", () => {
             callback(null, anchors);
         });
-        res.on("error", (err: Error) => {
+        res.on("error", (err: ServiceError) => {
             callback(err, anchors);
         });
     }
@@ -221,7 +220,7 @@ export class Client {
         res.on("data", (data: anchor.Batch) => {
             callback(null, data);
         });
-        res.on("error", (err: Error) => {
+        res.on("error", (err: ServiceError) => {
             callback(err, new anchor.Batch());
         });
     }
@@ -235,7 +234,12 @@ export class Client {
                 callback(err, new anchor.Proof());
             } else {
                 if (res.getStatus() === anchor.Batch.Status.ERROR) {
-                    callback(new Error(res.getError()), new anchor.Proof());
+                    callback({ 
+                        code: grpc.status.INTERNAL, 
+                        details: res.getError(), 
+                        metadata: new grpc.Metadata(), 
+                        name: grpc.status.INTERNAL.toString(), 
+                        message: res.getError()}, new anchor.Proof());
                     return;
                 }
                 // Retrieve the updated proof

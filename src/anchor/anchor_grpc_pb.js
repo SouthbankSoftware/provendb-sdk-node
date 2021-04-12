@@ -24,7 +24,7 @@
 // supports multiple anchor types and proof formats. Digital signing can be also
 // done at the Merkle root level
 'use strict';
-var grpc = require('grpc');
+var grpc = require('@grpc/grpc-js');
 var anchor_anchor_pb = require('../anchor/anchor_pb.js');
 var google_protobuf_empty_pb = require('google-protobuf/google/protobuf/empty_pb.js');
 var google_protobuf_timestamp_pb = require('google-protobuf/google/protobuf/timestamp_pb.js');
