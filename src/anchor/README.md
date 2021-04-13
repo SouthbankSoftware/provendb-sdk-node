@@ -11,7 +11,9 @@ Service definitions for the ProvenDB Anchor service can be found [here](https://
 
 - [Usage](#usage)
 - [Creating The Client](#creating-the-client)
-
+- [Submitting a Proof](#submitting-a-proof)
+- [Subscribing to Proof Changes](#subscribing-to-proof-changes)
+- [Documentation](#documentation)
 
 ## Usage 
 
@@ -25,4 +27,44 @@ import { anchor } from "provendb-sdk-node";
 let client = anchor.connect(anchor.withCredentials("YOUR_CREDENTIALS"));
 ```
 
+## Submitting a Proof
 
+To submit a quick proof with defaults:
+
+```js
+anchor.submitProof("da63e4bd82fc6e5fd7337e6bd9147d8cada6652d9049020edc6deb69b18cf69c", (err, proof) => {
+    if (err) {
+        console.log(err);
+    } else {
+        console.log(proof);
+    }
+})
+```
+
+To submit a proof with options such as `anchorType`:
+
+```js
+anchor.submitProof("da63e4bd82fc6e5fd7337e6bd9147d8cada6652d9049020edc6deb69b18cf69c", anchor.submitProofWithAnchorType(anchor.Anchor.Type.BTC_MAINNET))
+```
+
+## Subscribing to Proof Changes
+
+When a proof is submitted, it is yet to be confirmed. Depending on the chosen anchor type, it may take a while for a proof to be `CONFIRMED` status. By subscribing to a proof, you will receive an updated proof when its status changes.
+
+```js
+let proof: anchor.Proof = // your submitted proof
+
+anchor.subscribeProof(proof, callback(err, proof) => {
+    if (err) {
+        console.log(err);
+    } else {
+        if (proof.getBatchStatus() === anchor.Batch.Status.CONFIRMED) {
+            // do something
+        }
+    }
+})
+```
+
+## Documentation
+
+Full API documentation not yet available. You can browse the source code in the meantime to see available functions.
