@@ -1,14 +1,9 @@
 # provendb-sdk-node
 The ProvenDB SDK for Node.
 
-# anchor
+## Libraries
 
-```js
-import { anchor } from "provendb-sdk-node";
-```
-
-# merkle
-
-```js
-import { merkle } from "provendb-sdk-node";
-```
+| Name | Description |
+| :--- | :---------- |
+| [anchor](./src/anchor) | The ProvenDB Anchor client. |
+| [merkle](./src/merkle) | A merkle tree library. |
