@@ -1,6 +1,6 @@
 import * as anchor from "./anchor_pb";
 import * as service from "./anchor_grpc_pb";
-import grpc, { ClientReadableStream, ServiceError } from "@grpc/grpc-js";
+import { credentials, status, Metadata, ChannelCredentials, ClientReadableStream, ServiceError } from "@grpc/grpc-js";
 import * as google_protobuf_empty_pb from "google-protobuf/google/protobuf/empty_pb";
 
 export type ClientOption = (options: ClientOptions) => void;
@@ -32,9 +32,9 @@ export function connect(...opts: ClientOption[]): Client {
     opts.forEach((o) => {
         o(options);
     });
-    let chanCred: grpc.ChannelCredentials = options.insecure
-        ? grpc.credentials.createInsecure()
-        : grpc.credentials.createSsl();
+    let chanCred: ChannelCredentials = options.insecure
+        ? credentials.createInsecure()
+        : credentials.createSsl();
     return new Client(
         new service.AnchorServiceClient(options.address, chanCred)
     );
@@ -235,10 +235,10 @@ export class Client {
             } else {
                 if (res.getStatus() === anchor.Batch.Status.ERROR) {
                     callback({ 
-                        code: grpc.status.INTERNAL, 
+                        code: status.INTERNAL, 
                         details: res.getError(), 
-                        metadata: new grpc.Metadata(), 
-                        name: grpc.status.INTERNAL.toString(), 
+                        metadata: new Metadata(), 
+                        name: status.INTERNAL.toString(), 
                         message: res.getError()}, new anchor.Proof());
                     return;
                 }
