@@ -42,20 +42,20 @@ Adding items can be done singularly (`add()`), or in bulk (`addBatch()`). Any da
 be of `Buffer` type.
 
 ```js
-// Adding items singularly
-builder.add(Buffer.from("m"));
-builder.add(Buffer.from("e"));
-builder.add(Buffer.from("r"));
-builder.add(Buffer.from("k"));
-builder.add(Buffer.from("l"));
-builder.add(Buffer.from("e"));
+// Adding items singularly with key/value
+builder.add("key1", Buffer.from("m"));
+builder.add("key2", Buffer.from("e"));
+builder.add("key3", Buffer.from("r"));
+builder.add("key4", Buffer.from("k"));
+builder.add("key5", Buffer.from("l"));
+builder.add("key6", Buffer.from("e"));
 
 // Adding items in batches
 builder.addBatch([
-    Buffer.from("t"),
-    Buffer.from("r"),
-    Buffer.from("e"),
-    Buffer.from("e"),
+    { key: "key7", value: Buffer.from("t") },
+    { key: "key8", value: Buffer.from("r") },
+    { key: "key9", value: Buffer.from("e") },
+    { key: "key10", value: Buffer.from("e") }
 ]);
 ```
 
@@ -92,16 +92,16 @@ For our example, let's take the following constructed tree:
 
 ```js
 let tree = merkle.builder("sha256").addBatch([
-    Buffer.from("m"),
-    Buffer.from("e"),
-    Buffer.from("r"),
-    Buffer.from("k"),
-    Buffer.from("l"),
-    Buffer.from("e"),
-    Buffer.from("t"),
-    Buffer.from("r"),
-    Buffer.from("e"),
-    Buffer.from("e"),
+    { key: "key1", value: Buffer.from("m") },
+    { key: "key2", value: Buffer.from("e") },
+    { key: "key3", value: Buffer.from("r") },
+    { key: "key4", value: Buffer.from("k") },
+    { key: "key5", value: Buffer.from("l") },
+    { key: "key6", value: Buffer.from("e") },
+    { key: "key7", value: Buffer.from("t") },
+    { key: "key8", value: Buffer.from("r") },
+    { key: "key9", value: Buffer.from("e") },
+    { key: "key10", value: Buffer.from("e") },
 ]);
 ```
 
@@ -175,7 +175,7 @@ If you would like your proof to contain the path to a specific leaf in the tree,
 that the anchored hash can still be calculated.
 
 ```js
-let proof = tree.getPathWithProof(Buffer.from("62c66a7a5dd70c3146618063c344e531e6d4b59e379808443ce962b3abd63c5a"), true, your_proof, "my_custom_label");
+let proof = merkle.addPathToProof(your_proof, Buffer.from("62c66a7a5dd70c3146618063c344e531e6d4b59e379808443ce962b3abd63c5a"), "sha256", tree.getPath("key1"), "my_custom_label");
 ```
 
 A proof with the path should look like the following:
