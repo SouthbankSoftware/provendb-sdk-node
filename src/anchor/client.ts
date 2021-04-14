@@ -1,6 +1,13 @@
 import * as anchor from "./anchor_pb";
 import * as service from "./anchor_grpc_pb";
-import { credentials, status, Metadata, ChannelCredentials, ClientReadableStream, ServiceError } from "@grpc/grpc-js";
+import {
+    credentials,
+    status,
+    Metadata,
+    ChannelCredentials,
+    ClientReadableStream,
+    ServiceError,
+} from "@grpc/grpc-js";
 import * as google_protobuf_empty_pb from "google-protobuf/google/protobuf/empty_pb";
 
 export type ClientOption = (options: ClientOptions) => void;
@@ -116,88 +123,114 @@ export function subscribeBatchesWithFilter(filter: {
 export class Client {
     constructor(private client: service.AnchorServiceClient) {}
 
-    public getAnchors(
-        callback: (err: ServiceError | null, res: anchor.Anchor[]) => void
-    ) {
-        let res: ClientReadableStream<anchor.Anchor> = this.client.getAnchors(
-            new google_protobuf_empty_pb.Empty()
-        );
-        let anchors: anchor.Anchor[] = [];
-        res.on("data", (data: anchor.Anchor) => {
-            anchors.push();
-        });
-        res.on("end", () => {
-            callback(null, anchors);
-        });
-        res.on("error", (err: ServiceError) => {
-            callback(err, anchors);
+    public getAnchors(): Promise<anchor.Anchor[]> {
+        return new Promise<anchor.Anchor[]>((res, rej) => {
+            let r: ClientReadableStream<anchor.Anchor> = this.client.getAnchors(
+                new google_protobuf_empty_pb.Empty()
+            );
+            let anchors: anchor.Anchor[] = [];
+            r.on("data", (data: anchor.Anchor) => {
+                anchors.push(data);
+            });
+            r.on("end", () => {
+                res(anchors);
+            });
+            r.on("error", (err: ServiceError) => {
+                rej(err);
+            });
         });
     }
 
-    public getAnchor(
-        anchorType: anchor.Anchor.Type,
-        callback: (err: ServiceError | null, res: anchor.Anchor) => void
-    ) {
-        let req: anchor.AnchorRequest = new anchor.AnchorRequest().setType(
-            anchorType
-        );
-        this.client.getAnchor(req, callback);
+    public getAnchor(anchorType: anchor.Anchor.Type): Promise<anchor.Anchor> {
+        return new Promise<anchor.Anchor>((res, rej) => {
+            let req: anchor.AnchorRequest = new anchor.AnchorRequest().setType(
+                anchorType
+            );
+            this.client.getAnchor(req, (err, r) => {
+                if (err) {
+                    rej(err);
+                } else {
+                    res(r);
+                }
+            });
+        });
     }
 
     public getBatch(
         batchId: string,
-        anchorType: anchor.Anchor.Type,
-        callback: (err: ServiceError | null, res: anchor.Batch) => void
-    ) {
-        let req: anchor.BatchRequest = new anchor.BatchRequest()
-            .setBatchId(batchId)
-            .setAnchorType(anchorType);
-        this.client.getBatch(req, callback);
+        anchorType: anchor.Anchor.Type
+    ): Promise<anchor.Batch> {
+        return new Promise<anchor.Batch>((res, rej) => {
+            let req: anchor.BatchRequest = new anchor.BatchRequest()
+                .setBatchId(batchId)
+                .setAnchorType(anchorType);
+            this.client.getBatch(req, (err, r) => {
+                if (err) {
+                    rej(err);
+                } else {
+                    res(r);
+                }
+            });
+        });
     }
 
     public getProof(
         hash: string,
         batchId: string,
         anchorType: anchor.Anchor.Type,
-        callback: (err: ServiceError | null, res: anchor.Proof) => void,
         ...opts: GetProofOption[]
-    ) {
-        let options: GetProofOptions = {
-            returnBatch: true,
-        };
-        opts.forEach((o) => o(options));
-        let req = new anchor.ProofRequest()
-            .setHash(hash)
-            .setBatchId(batchId)
-            .setAnchorType(anchorType)
-            .setWithBatch(options.returnBatch);
-        this.client.getProof(req, callback);
+    ): Promise<anchor.Proof> {
+        return new Promise<anchor.Proof>((res, rej) => {
+            let options: GetProofOptions = {
+                returnBatch: true,
+            };
+            opts.forEach((o) => o(options));
+            let req = new anchor.ProofRequest()
+                .setHash(hash)
+                .setBatchId(batchId)
+                .setAnchorType(anchorType)
+                .setWithBatch(options.returnBatch);
+            this.client.getProof(req, (err, r) => {
+                if (err) {
+                    rej(err);
+                } else {
+                    res(r);
+                }
+            });
+        });
     }
 
     public submitProof(
         hash: string,
-        callback: (err: ServiceError | null, res: anchor.Proof) => void,
         ...opts: SubmitProofOption[]
-    ) {
-        // Set the default options
-        let options: SubmitProofOptions = {
-            anchorType: anchor.Anchor.Type.ETH,
-            format: anchor.Proof.Format.CHP_PATH,
-            skipBatching: false,
-            returnBatch: true,
-        };
-        opts.forEach((o) => o(options));
+    ): Promise<anchor.Proof> {
+        return new Promise<anchor.Proof>((res, rej) => {
+            // Set the default options
+            let options: SubmitProofOptions = {
+                anchorType: anchor.Anchor.Type.ETH,
+                format: anchor.Proof.Format.CHP_PATH,
+                skipBatching: false,
+                returnBatch: true,
+            };
+            opts.forEach((o) => o(options));
 
-        let req: anchor.SubmitProofRequest = new anchor.SubmitProofRequest()
-            .setAnchorType(options.anchorType)
-            .setHash(hash)
-            .setFormat(options.format)
-            .setSkipBatching(options.skipBatching)
-            .setWithBatch(options.returnBatch);
-        this.client.submitProof(req, callback);
+            let req: anchor.SubmitProofRequest = new anchor.SubmitProofRequest()
+                .setAnchorType(options.anchorType)
+                .setHash(hash)
+                .setFormat(options.format)
+                .setSkipBatching(options.skipBatching)
+                .setWithBatch(options.returnBatch);
+            this.client.submitProof(req, (err, r) => {
+                if (err) {
+                    rej(err);
+                } else {
+                    res(r);
+                }
+            });
+        });
     }
 
-    public subscribeBatches(
+    public subscribeBatch(
         callback: (err: ServiceError | null, res: anchor.Batch) => void,
         ...opts: SubscribeBatchesOption[]
     ) {
@@ -229,17 +262,21 @@ export class Client {
         proof: anchor.Proof,
         callback: (err: ServiceError | null, res: anchor.Proof) => void
     ) {
-        this.subscribeBatches((err: ServiceError | null, res: anchor.Batch) => {
+        this.subscribeBatch((err: ServiceError | null, res: anchor.Batch) => {
             if (err) {
                 callback(err, new anchor.Proof());
             } else {
                 if (res.getStatus() === anchor.Batch.Status.ERROR) {
-                    callback({ 
-                        code: status.INTERNAL, 
-                        details: res.getError(), 
-                        metadata: new Metadata(), 
-                        name: status.INTERNAL.toString(), 
-                        message: res.getError()}, new anchor.Proof());
+                    callback(
+                        {
+                            code: status.INTERNAL,
+                            details: res.getError(),
+                            metadata: new Metadata(),
+                            name: status.INTERNAL.toString(),
+                            message: res.getError(),
+                        },
+                        new anchor.Proof()
+                    );
                     return;
                 }
                 // Retrieve the updated proof
@@ -247,9 +284,10 @@ export class Client {
                     proof.getHash(),
                     proof.getBatchId(),
                     proof.getAnchorType(),
-                    callback,
                     getProofWithReturnBatch(true)
-                );
+                )
+                    .then((res) => callback(null, res))
+                    .catch((err) => callback(err, new anchor.Proof()));
             }
         }, subscribeBatchesWithFilter({ batchId: proof.getBatchId(), anchorType: proof.getAnchorType() }));
     }
@@ -257,22 +295,23 @@ export class Client {
     public verifyProof(
         data: string,
         anchorType: anchor.Anchor.Type,
-        format: anchor.Proof.Format,
-        callback: (err: ServiceError | null, res: boolean) => void
-    ) {
-        let req: anchor.VerifyProofRequest = new anchor.VerifyProofRequest()
-            .setData(data)
-            .setAnchorType(anchorType)
-            .setFormat(format);
-        this.client.verifyProof(
-            req,
-            (err: ServiceError | null, res: anchor.VerifyProofReply) => {
-                if (err) {
-                    callback(err, false);
-                } else {
-                    callback(null, res.getVerified());
+        format: anchor.Proof.Format
+    ): Promise<boolean> {
+        return new Promise<boolean>((res, rej) => {
+            let req: anchor.VerifyProofRequest = new anchor.VerifyProofRequest()
+                .setData(data)
+                .setAnchorType(anchorType)
+                .setFormat(format);
+            this.client.verifyProof(
+                req,
+                (err: ServiceError | null, r: anchor.VerifyProofReply) => {
+                    if (err) {
+                        rej(err);
+                    } else {
+                        res(r.getVerified());
+                    }
                 }
-            }
-        );
+            );
+        });
     }
 }

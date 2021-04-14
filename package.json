@@ -6,11 +6,11 @@
   "types": "lib/index.d.ts",
   "scripts": {
     "clean": "rm -rf lib",
-    "build": "npm run clean && tsc",
+    "build": "npm run clean && tsc src",
     "format": "prettier --config .prettierrc 'src/**/*.ts' --write",
+    "test": "jest",
     "playground": "npm run build && node lib/merkle.playground.js",
-    "start": "npm run build && node dist/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "npm run build && node lib/index.js",
     "proto-gen-anchor": "protoc --plugin=protoc-gen-ts=./node_modules/.bin/protoc-gen-ts --plugin=protoc-gen-grpc=./node_modules/.bin/grpc_tools_node_protoc_plugin --ts_out=grpc_js:./src --js_out=import_style=commonjs,binary:./src --grpc_out=grpc_js:./src -I $PROVENDB_APIS $PROVENDB_APIS/anchor/anchor.proto"
   },
   "repository": {
@@ -25,10 +25,13 @@
   "homepage": "https://github.com/SouthbankSoftware/provendb-sdk-node#readme",
   "devDependencies": {
     "@types/google-protobuf": "^3.7.4",
+    "@types/jest": "^26.0.22",
     "@types/node": "^14.14.32",
     "grpc-tools": "^1.10.0",
     "grpc_tools_node_protoc_ts": "^5.1.3",
+    "jest": "^26.6.3",
     "prettier": "^2.2.1",
+    "ts-jest": "^26.5.4",
     "ts-loader": "^8.0.17",
     "tslint": "^6.1.3",
     "typescript": "^4.2.3",

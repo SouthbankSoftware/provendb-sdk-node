@@ -4,7 +4,7 @@ import { Proof } from "./proof";
 
 export interface Leaf {
     // Key.
-    key: string
+    key: string;
     // Hex encoded hash.
     hash: string;
 }
@@ -113,13 +113,13 @@ export class Tree {
 
     getLeaf(key: string): Leaf | null {
         let leaf = null;
-        this.layers[0].forEach(v => {
-            let s: string[] = v.split(":")
+        this.layers[0].forEach((v) => {
+            let s: string[] = v.split(":");
             if (s[0] === key) {
-                leaf = { key: s[0], hash: s[1]};
+                leaf = { key: s[0], hash: s[1] };
                 return;
             }
-        })
+        });
         return leaf;
     }
 
@@ -128,9 +128,9 @@ export class Tree {
      */
     getLeaves(): Leaf[] {
         let leaves: Leaf[] = [];
-        this.layers[0].forEach(v => {
-            let s: string[] = v.split(":")
-            leaves.push({ key: s[0], hash: s[1]});
+        this.layers[0].forEach((v) => {
+            let s: string[] = v.split(":");
+            leaves.push({ key: s[0], hash: s[1] });
         });
         return leaves;
     }
@@ -229,7 +229,7 @@ export class Tree {
     verify(): boolean {
         let current: string[] = [];
         let leaves = this.getLeaves();
-        leaves.forEach(l => current.push(l.hash))
+        leaves.forEach((l) => current.push(l.hash));
         let layer = [];
         // Loop through until we have a single node i.e. root hash.
         while (current.length > 1) {
@@ -304,7 +304,7 @@ export class Builder {
      * Adds an array of leaves to the tree.
      * @param data the array of data to add.
      */
-    addBatch(data: {key: string, value: Buffer}[]): Builder {
+    addBatch(data: { key: string; value: Buffer }[]): Builder {
         data.forEach((d) => {
             this.add(d.key, d.value);
         });
