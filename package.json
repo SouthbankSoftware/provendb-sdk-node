@@ -6,7 +6,7 @@
   "types": "lib/index.d.ts",
   "scripts": {
     "clean": "rm -rf lib",
-    "build": "npm run clean && tsc src",
+    "build": "npm run clean && tsc",
     "format": "prettier --config .prettierrc 'src/**/*.ts' --write",
     "test": "jest",
     "playground": "npm run build && node lib/merkle.playground.js",
