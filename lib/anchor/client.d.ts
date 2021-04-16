@@ -17,11 +17,13 @@ export interface SubmitProofOptions {
     format: anchor.Proof.Format;
     skipBatching: boolean;
     returnBatch: boolean;
+    awaitConfirmed: boolean;
 }
 export declare function submitProofWithAnchorType(anchorType: any): SubmitProofOption;
 export declare function submitProofWithFormat(format: any): SubmitProofOption;
 export declare function submitProofWithSkipBatching(skipBatching: boolean): SubmitProofOption;
 export declare function submitProofWithReturnBatch(returnBatch: boolean): SubmitProofOption;
+export declare function submitProofWithAwaitConfirmed(awaitConfirmed: boolean): SubmitProofOption;
 export interface GetProofOptions {
     returnBatch: boolean;
 }
@@ -41,12 +43,12 @@ export declare function subscribeBatchesWithFilter(filter: {
 export declare class Client {
     private client;
     constructor(client: service.AnchorServiceClient);
-    getAnchors(): Promise<anchor.Anchor[]>;
-    getAnchor(anchorType: anchor.Anchor.Type): Promise<anchor.Anchor>;
-    getBatch(batchId: string, anchorType: anchor.Anchor.Type): Promise<anchor.Batch>;
-    getProof(hash: string, batchId: string, anchorType: anchor.Anchor.Type, ...opts: GetProofOption[]): Promise<anchor.Proof>;
-    submitProof(hash: string, ...opts: SubmitProofOption[]): Promise<anchor.Proof>;
-    subscribeBatch(callback: (err: ServiceError | null, res: anchor.Batch) => void, ...opts: SubscribeBatchesOption[]): void;
-    subscribeProof(proof: anchor.Proof, callback: (err: ServiceError | null, res: anchor.Proof) => void): void;
+    getAnchors(): Promise<anchor.Anchor.AsObject[]>;
+    getAnchor(anchorType: anchor.Anchor.Type): Promise<anchor.Anchor.AsObject>;
+    getBatch(batchId: string, anchorType: anchor.Anchor.Type): Promise<anchor.Batch.AsObject>;
+    getProof(hash: string, batchId: string, anchorType: anchor.Anchor.Type, ...opts: GetProofOption[]): Promise<anchor.Proof.AsObject>;
+    submitProof(hash: string, ...opts: SubmitProofOption[]): Promise<anchor.Proof.AsObject>;
+    subscribeBatch(callback: (err: ServiceError | null, res: anchor.Batch.AsObject) => void, ...opts: SubscribeBatchesOption[]): void;
+    subscribeProof(proof: anchor.Proof.AsObject, callback: (err: ServiceError | null, res: anchor.Proof.AsObject) => void): void;
     verifyProof(data: string, anchorType: anchor.Anchor.Type, format: anchor.Proof.Format): Promise<boolean>;
 }

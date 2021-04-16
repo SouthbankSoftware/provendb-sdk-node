@@ -1,6 +1,7 @@
 import crypto from "crypto";
 import fs from "fs";
-import { Proof } from "./proof";
+import { anchor } from "..";
+import { fromAnchorProof, Proof } from "./proof";
 
 export interface Leaf {
     // Key.
@@ -100,8 +101,12 @@ export class Tree {
      * Adds a confirmed proof to this tree.
      * @param proof the proof to add.
      */
-    addProof(proof: Proof) {
-        this.proofs.push(proof);
+    addProof(proof: Proof | anchor.Proof.AsObject) {
+        if ((proof as anchor.Proof.AsObject)) {
+            this.proofs.push(fromAnchorProof(proof as anchor.Proof.AsObject));
+        } else {
+            this.proofs.push(proof as Proof);
+        }
     }
 
     /**
@@ -288,6 +293,7 @@ export class Builder {
     private layers: string[][] = [];
 
     constructor(private algorithm: string) {
+        validateAlgorithm(algorithm);
         this.layers.push([]);
     }
     /**
@@ -367,6 +373,29 @@ export class Builder {
      * @param data the data to hash.
      */
     private createHash(data: Buffer): string {
-        return crypto.createHash(this.algorithm).update(data).digest("hex");
+        return crypto.createHash(normalizeAlgorithm(this.algorithm)).update(data).digest("hex");
+    }
+}
+
+
+function validateAlgorithm(algorithm: string) {
+    switch(algorithm) {
+        case "sha-256":
+            break;
+        case "sha-512":
+            break;
+        default:
+            throw new Error("algorithm '" + algorithm + "' not supported");
+    }
+}
+
+function normalizeAlgorithm(algorithm: string) {
+    switch(algorithm) {
+        case "sha-256":
+            return "sha256"
+        case "sha-512":
+            return "sha512";
+        default:
+            throw new Error("algorithm '" + algorithm + "' not supported");
     }
 }

@@ -1,4 +1,5 @@
 /// <reference types="node" />
+import { anchor } from "..";
 import { Proof } from "./proof";
 export interface Leaf {
     key: string;
@@ -63,7 +64,7 @@ export declare class Tree {
      * Adds a confirmed proof to this tree.
      * @param proof the proof to add.
      */
-    addProof(proof: Proof): void;
+    addProof(proof: Proof | anchor.Proof.AsObject): void;
     /**
      * Retreives the algorithm used to construct the tree.
      */

@@ -15,7 +15,7 @@ export interface Proof {
  * @param proof the anchor proof
  * @returns the merkle proof
  */
-export declare function fromAnchorProof(proof: anchor.Proof): Proof;
+export declare function fromAnchorProof(proof: anchor.Proof.AsObject): Proof;
 /**
  *
  * @param proof the proof to add the path to

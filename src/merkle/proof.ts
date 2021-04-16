@@ -21,17 +21,17 @@ export interface Proof {
  * @param proof the anchor proof
  * @returns the merkle proof
  */
-export function fromAnchorProof(proof: anchor.Proof): Proof {
+export function fromAnchorProof(proof: anchor.Proof.AsObject): Proof {
     let metadata: any = {};
     metadata.format = "";
     return {
-        id: proof.getHash() + "-" + proof.getBatchId(),
-        anchorType: proof.getAnchorType(),
-        format: proof.getFormat(),
-        metadata: proof.getBatch()
-            ? JSON.parse(proof.getBatch()!.getData())
+        id: proof.hash + "-" + proof.batchId,
+        anchorType: proof.anchorType,
+        format: proof.format,
+        metadata: proof.batch
+            ? JSON.parse(proof.batch!.data)
             : {},
-        data: anchor.decodeProof(proof.getData()),
+        data: anchor.decodeProof(proof.data),
     };
 }
 
