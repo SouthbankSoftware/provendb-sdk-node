@@ -35,7 +35,7 @@ let client = anchor.connect(anchor.withCredentials("YOUR_API_KEY"));
 // Create your proof
 let proof = await anchor.submitProof(tree.getRoot(), 
     anchor.submitProofWithAnchorType(anchor.Anchor.Type.HEDERA_MAINNET), // Optional. Add your anchor type.
-    anchor.submitProofWithAwaitConfirmation(true)); // Optional. Resolve the promise only when the proof is confirmed.
+    anchor.submitProofWithAwaitConfirmed(true)); // Optional. Resolve the promise only when the proof is confirmed.
 ```
 
 Congratulations, you have successfully anchored your first `Hello, World!` proof! Let's save our proof to our merkle tree
