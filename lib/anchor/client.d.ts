@@ -1,6 +1,7 @@
 import * as anchor from "./anchor_pb";
 import * as service from "./anchor_grpc_pb";
 import { ServiceError } from "@grpc/grpc-js";
+import { AnchorProof } from "./proof";
 export declare type ClientOption = (options: ClientOptions) => void;
 export declare function withAddress(address: string): ClientOption;
 export declare function withInsecure(insecure: boolean): ClientOption;
@@ -46,9 +47,9 @@ export declare class Client {
     getAnchors(): Promise<anchor.Anchor.AsObject[]>;
     getAnchor(anchorType: anchor.Anchor.Type): Promise<anchor.Anchor.AsObject>;
     getBatch(batchId: string, anchorType: anchor.Anchor.Type): Promise<anchor.Batch.AsObject>;
-    getProof(hash: string, batchId: string, anchorType: anchor.Anchor.Type, ...opts: GetProofOption[]): Promise<anchor.Proof.AsObject>;
-    submitProof(hash: string, ...opts: SubmitProofOption[]): Promise<anchor.Proof.AsObject>;
+    getProof(hash: string, batchId: string, anchorType: anchor.Anchor.Type, ...opts: GetProofOption[]): Promise<AnchorProof>;
+    submitProof(hash: string, ...opts: SubmitProofOption[]): Promise<AnchorProof>;
     subscribeBatch(callback: (err: ServiceError | null, res: anchor.Batch.AsObject) => void, ...opts: SubscribeBatchesOption[]): void;
-    subscribeProof(proof: anchor.Proof.AsObject, callback: (err: ServiceError | null, res: anchor.Proof.AsObject) => void): void;
+    subscribeProof(proof: AnchorProof, callback: (err: ServiceError | null, res: AnchorProof) => void): void;
     verifyProof(data: string, anchorType: anchor.Anchor.Type, format: anchor.Proof.Format): Promise<boolean>;
 }

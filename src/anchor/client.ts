@@ -9,6 +9,7 @@ import {
     ServiceError,
 } from "@grpc/grpc-js";
 import * as google_protobuf_empty_pb from "google-protobuf/google/protobuf/empty_pb";
+import { AnchorProof, toAnchorProof } from "./proof";
 
 export type ClientOption = (options: ClientOptions) => void;
 
@@ -91,10 +92,12 @@ export function submitProofWithReturnBatch(
     };
 }
 
-export function submitProofWithAwaitConfirmed(awaitConfirmed: boolean): SubmitProofOption {
+export function submitProofWithAwaitConfirmed(
+    awaitConfirmed: boolean
+): SubmitProofOption {
     return function (opts: SubmitProofOptions) {
         opts.awaitConfirmed = awaitConfirmed;
-    }
+    };
 }
 
 export interface GetProofOptions {
@@ -148,7 +151,9 @@ export class Client {
         });
     }
 
-    public getAnchor(anchorType: anchor.Anchor.Type): Promise<anchor.Anchor.AsObject> {
+    public getAnchor(
+        anchorType: anchor.Anchor.Type
+    ): Promise<anchor.Anchor.AsObject> {
         return new Promise<anchor.Anchor.AsObject>((res, rej) => {
             let req: anchor.AnchorRequest = new anchor.AnchorRequest().setType(
                 anchorType
@@ -186,8 +191,8 @@ export class Client {
         batchId: string,
         anchorType: anchor.Anchor.Type,
         ...opts: GetProofOption[]
-    ): Promise<anchor.Proof.AsObject> {
-        return new Promise<anchor.Proof.AsObject>((res, rej) => {
+    ): Promise<AnchorProof> {
+        return new Promise<AnchorProof>((res, rej) => {
             let options: GetProofOptions = {
                 returnBatch: true,
             };
@@ -201,7 +206,7 @@ export class Client {
                 if (err) {
                     rej(err);
                 } else {
-                    res(r.toObject());
+                    res(toAnchorProof(r));
                 }
             });
         });
@@ -210,8 +215,8 @@ export class Client {
     public submitProof(
         hash: string,
         ...opts: SubmitProofOption[]
-    ): Promise<anchor.Proof.AsObject> {
-        return new Promise<anchor.Proof.AsObject>((res, rej) => {
+    ): Promise<AnchorProof> {
+        return new Promise<AnchorProof>((res, rej) => {
             // Set the default options
             let options: SubmitProofOptions = {
                 anchorType: anchor.Anchor.Type.ETH,
@@ -234,17 +239,17 @@ export class Client {
                 } else {
                     // If await confirmed is true, we will subscribe to this proof
                     if (options.awaitConfirmed) {
-                        this.subscribeProof(r.toObject(), (err, p) => {
+                        this.subscribeProof(toAnchorProof(r), (err, p) => {
                             if (err) {
                                 rej(err);
                             } else {
-                                if (p.batchStatus === anchor.Batch.Status.CONFIRMED) {
-                                    res(p)
+                                if (p.status === "CONFIRMED") {
+                                    res(p);
                                 }
                             }
-                        })
+                        });
                     } else {
-                        res(r.toObject());
+                        res(toAnchorProof(r));
                     }
                 }
             });
@@ -252,7 +257,10 @@ export class Client {
     }
 
     public subscribeBatch(
-        callback: (err: ServiceError | null, res: anchor.Batch.AsObject) => void,
+        callback: (
+            err: ServiceError | null,
+            res: anchor.Batch.AsObject
+        ) => void,
         ...opts: SubscribeBatchesOption[]
     ) {
         let options: SubscribeBatchesOptions = {
@@ -280,37 +288,50 @@ export class Client {
     }
 
     public subscribeProof(
-        proof: anchor.Proof.AsObject,
-        callback: (err: ServiceError | null, res: anchor.Proof.AsObject) => void
+        proof: AnchorProof,
+        callback: (err: ServiceError | null, res: AnchorProof) => void
     ) {
-        this.subscribeBatch((err: ServiceError | null, res: anchor.Batch.AsObject) => {
-            if (err) {
-                callback(err, new anchor.Proof().toObject());
-            } else {
-                if (res.status === anchor.Batch.Status.ERROR) {
-                    callback(
-                        {
-                            code: status.INTERNAL,
-                            details: res.error,
-                            metadata: new Metadata(),
-                            name: status.INTERNAL.toString(),
-                            message: res.error,
-                        },
-                        new anchor.Proof().toObject()
-                    );
-                    return;
+        this.subscribeBatch(
+            (err: ServiceError | null, res: anchor.Batch.AsObject) => {
+                if (err) {
+                    callback(err, toAnchorProof(new anchor.Proof()));
+                } else {
+                    if (res.status === anchor.Batch.Status.ERROR) {
+                        callback(
+                            {
+                                code: status.INTERNAL,
+                                details: res.error,
+                                metadata: new Metadata(),
+                                name: status.INTERNAL.toString(),
+                                message: res.error,
+                            },
+                            toAnchorProof(new anchor.Proof())
+                        );
+                        return;
+                    }
+                    // Retrieve the updated proof
+                    this.getProof(
+                        proof.hash,
+                        proof.batchId,
+                        anchor.Anchor.Type[
+                            proof.anchorType as keyof typeof anchor.Anchor.Type
+                        ],
+                        getProofWithReturnBatch(true)
+                    )
+                        .then((res) => callback(null, res))
+                        .catch((err) =>
+                            callback(err, toAnchorProof(new anchor.Proof()))
+                        );
                 }
-                // Retrieve the updated proof
-                this.getProof(
-                    proof.hash,
-                    proof.batchId,
-                    proof.anchorType,
-                    getProofWithReturnBatch(true)
-                )
-                    .then((res) => callback(null, res))
-                    .catch((err) => callback(err, new anchor.Proof().toObject()));
-            }
-        }, subscribeBatchesWithFilter({ batchId: proof.batchId, anchorType: proof.anchorType }));
+            },
+            subscribeBatchesWithFilter({
+                batchId: proof.batchId,
+                anchorType:
+                    anchor.Anchor.Type[
+                        proof.anchorType as keyof typeof anchor.Anchor.Type
+                    ],
+            })
+        );
     }
 
     public verifyProof(

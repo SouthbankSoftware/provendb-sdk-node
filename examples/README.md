@@ -23,17 +23,17 @@ let tree = builder.build();
 
 ```
 
-Once you have your tree object, you are now ready to anchor it! To anchor it, we use the root hash
-of the merkle tree and submit it to the ProvenDB Anchor service.
+
 
 ```js
 import { anchor } from "provendb-sdk-node";
 
-// Connect to the anchor service.
+// Once you have your tree object, you are now ready to anchor it! To anchor it, we use the root hash
+// of the merkle tree and submit it to the ProvenDB Anchor service. Create your new anchor client.
 let client = anchor.connect(anchor.withCredentials("YOUR_API_KEY"));
 
 // Create your proof
-let proof = await anchor.submitProof(tree.getRoot(), 
+let proof = await client.submitProof(tree.getRoot(), 
     anchor.submitProofWithAnchorType(anchor.Anchor.Type.HEDERA_MAINNET), // Optional. Add your anchor type.
     anchor.submitProofWithAwaitConfirmed(true)); // Optional. Resolve the promise only when the proof is confirmed.
 ```

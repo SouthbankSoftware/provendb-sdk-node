@@ -2,40 +2,6 @@ import * as anchor from "../anchor";
 import { Path } from "./merkle";
 
 /**
- * Representation of a confirmed and complete proof.
- */
-export interface Proof {
-    id: string;
-    // The anchor type.
-    anchorType: anchor.Anchor.Type;
-    // The proof format.
-    format: anchor.Proof.Format;
-    // Metadata about the transaction.
-    metadata: any;
-    // The proof data (receipt).
-    data: any;
-}
-
-/**
- * Converts an anchor confirmed proof to a merkle proof.
- * @param proof the anchor proof
- * @returns the merkle proof
- */
-export function fromAnchorProof(proof: anchor.Proof.AsObject): Proof {
-    let metadata: any = {};
-    metadata.format = "";
-    return {
-        id: proof.hash + "-" + proof.batchId,
-        anchorType: proof.anchorType,
-        format: proof.format,
-        metadata: proof.batch
-            ? JSON.parse(proof.batch!.data)
-            : {},
-        data: anchor.decodeProof(proof.data),
-    };
-}
-
-/**
  *
  * @param proof the proof to add the path to
  * @param hash the hash the path begins at
@@ -45,29 +11,29 @@ export function fromAnchorProof(proof: anchor.Proof.AsObject): Proof {
  * @returns the updated proof
  */
 export function addPathToProof(
-    proof: Proof,
+    proof: anchor.AnchorProof,
     hash: string,
     algorithm: string,
     path: Path[],
     label?: string
-): Proof {
+): anchor.AnchorProof {
     switch (proof.format) {
-        case anchor.Proof.Format.CHP_PATH:
-            addPathCHP(proof, hash, algorithm, path, label);
-        case anchor.Proof.Format.CHP_PATH_SIGNED:
-            addPathCHP(proof, hash, algorithm, path, label);
+        case "CHP_PATH":
+            return addPathCHP(proof, hash, algorithm, path, label);
+        case "CHP_PATH_SIGNED":
+            return addPathCHP(proof, hash, algorithm, path, label);
         default:
             throw new Error("proof format not supported");
     }
 }
 
 function addPathCHP(
-    proof: Proof,
+    proof: anchor.AnchorProof,
     hash: string,
     algorithm: string,
     path: Path[],
     label?: string
-): Proof {
+): anchor.AnchorProof {
     // Create new path branch
     let p: anchor.Chainpoint.V3.Proof = anchor.Chainpoint.V3.parse(proof.data);
     let branch: anchor.Chainpoint.V3.Branch = {
@@ -90,8 +56,11 @@ function addPathCHP(
     return {
         id: proof.id,
         anchorType: proof.anchorType,
+        batchId: proof.batchId,
+        status: proof.status,
+        hash: hash,
         format: proof.format,
         metadata: proof.metadata,
-        data: proof.data,
+        data: p,
     };
 }

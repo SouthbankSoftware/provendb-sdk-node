@@ -1,7 +1,7 @@
 import crypto from "crypto";
 import fs from "fs";
 import { anchor } from "..";
-import { fromAnchorProof, Proof } from "./proof";
+import { addPathToProof } from "./proof";
 
 export interface Leaf {
     // Key.
@@ -22,7 +22,7 @@ export interface File {
     /**
      * Any anchors for this tree.
      */
-    proofs: Proof[];
+    proofs: anchor.AnchorProof[];
 
     /**
      * The tree data.
@@ -75,7 +75,7 @@ export class Tree {
     constructor(
         private algorithm: string,
         private layers: string[][],
-        private proofs: Proof[] = []
+        private proofs: anchor.AnchorProof[] = []
     ) {
         this.algorithm = algorithm;
         this.layers = layers;
@@ -101,12 +101,21 @@ export class Tree {
      * Adds a confirmed proof to this tree.
      * @param proof the proof to add.
      */
-    addProof(proof: Proof | anchor.Proof.AsObject) {
-        if ((proof as anchor.Proof.AsObject)) {
-            this.proofs.push(fromAnchorProof(proof as anchor.Proof.AsObject));
-        } else {
-            this.proofs.push(proof as Proof);
+    addProof(proof: anchor.AnchorProof) {
+        this.proofs.push(proof);
+    }
+
+    /**
+     * 
+     * @param proof the proof to add the path to
+     * @param key the key of the leaf to generate path from
+     */
+    addPathToProof(proof: anchor.AnchorProof, key: string, label?: string): anchor.AnchorProof {
+        let leaf = this.getLeaf(key);
+        if (leaf == null) {
+            throw new Error("key '" + key + "' does not exist");
         }
+        return addPathToProof(proof, leaf!.hash, this.algorithm, this.getPath(leaf), label)
     }
 
     /**
@@ -152,13 +161,8 @@ export class Tree {
      * Retrieves the path to the root from the leaf.
      * @param leaf the leaf
      */
-    getPath(leaf: Buffer, isHashed: boolean): Path[] {
-        let hash = "";
-        if (isHashed) {
-            hash = leaf.toString();
-        } else {
-            hash = crypto.createHash(this.algorithm).update(leaf).digest("hex");
-        }
+    getPath(leaf: Leaf): Path[] {
+        let hash = leaf.hash;
         let path: Path[] = [];
         // Find the leaf first
         let index = -1;
@@ -373,13 +377,15 @@ export class Builder {
      * @param data the data to hash.
      */
     private createHash(data: Buffer): string {
-        return crypto.createHash(normalizeAlgorithm(this.algorithm)).update(data).digest("hex");
+        return crypto
+            .createHash(normalizeAlgorithm(this.algorithm))
+            .update(data)
+            .digest("hex");
     }
 }
 
-
 function validateAlgorithm(algorithm: string) {
-    switch(algorithm) {
+    switch (algorithm) {
         case "sha-256":
             break;
         case "sha-512":
@@ -390,9 +396,9 @@ function validateAlgorithm(algorithm: string) {
 }
 
 function normalizeAlgorithm(algorithm: string) {
-    switch(algorithm) {
+    switch (algorithm) {
         case "sha-256":
-            return "sha256"
+            return "sha256";
         case "sha-512":
             return "sha512";
         default:

@@ -1,6 +1,5 @@
 /// <reference types="node" />
 import { anchor } from "..";
-import { Proof } from "./proof";
 export interface Leaf {
     key: string;
     hash: string;
@@ -16,7 +15,7 @@ export interface File {
     /**
      * Any anchors for this tree.
      */
-    proofs: Proof[];
+    proofs: anchor.AnchorProof[];
     /**
      * The tree data.
      */
@@ -54,7 +53,7 @@ export declare class Tree {
      * @param algorithm the algorithm used to construct the tree
      * @param layers the merkle tree
      */
-    constructor(algorithm: string, layers: string[][], proofs?: Proof[]);
+    constructor(algorithm: string, layers: string[][], proofs?: anchor.AnchorProof[]);
     /**
      * Syncronously exports the merkle tree to file with the specified encoding.
      * @param path the path including filename to export to.
@@ -64,7 +63,13 @@ export declare class Tree {
      * Adds a confirmed proof to this tree.
      * @param proof the proof to add.
      */
-    addProof(proof: Proof | anchor.Proof.AsObject): void;
+    addProof(proof: anchor.AnchorProof): void;
+    /**
+     *
+     * @param proof the proof to add the path to
+     * @param key the key of the leaf to generate path from
+     */
+    addPathToProof(proof: anchor.AnchorProof, key: string, label?: string): anchor.AnchorProof;
     /**
      * Retreives the algorithm used to construct the tree.
      */
@@ -83,7 +88,7 @@ export declare class Tree {
      * Retrieves the path to the root from the leaf.
      * @param leaf the leaf
      */
-    getPath(leaf: Buffer, isHashed: boolean): Path[];
+    getPath(leaf: Leaf): Path[];
     /**
      * Retrieves the proof, if any, for this tree.
      */

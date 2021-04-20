@@ -1,3 +1,19 @@
+import { Proof } from "./anchor_pb";
+/**
+ * AnchorProof is a represention of a Proof object with tasks such as decoding already
+ * performed and enums represented as strings.
+ */
+export interface AnchorProof {
+    id: string;
+    anchorType: string;
+    batchId: string;
+    status: string;
+    format: string;
+    hash: string;
+    metadata: any;
+    data: any;
+}
+export declare function toAnchorProof(proof: Proof): AnchorProof;
 /**
  * Decodes the given base64 encoded proof.
  * @param data the base64 encoded proof string
