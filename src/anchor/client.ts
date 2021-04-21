@@ -60,7 +60,6 @@ export interface SubmitProofOptions {
     anchorType: anchor.Anchor.Type;
     format: anchor.Proof.Format;
     skipBatching: boolean;
-    returnBatch: boolean;
     awaitConfirmed: boolean;
 }
 
@@ -84,31 +83,11 @@ export function submitProofWithSkipBatching(
     };
 }
 
-export function submitProofWithReturnBatch(
-    returnBatch: boolean
-): SubmitProofOption {
-    return function (opts: SubmitProofOptions) {
-        opts.returnBatch = returnBatch;
-    };
-}
-
 export function submitProofWithAwaitConfirmed(
     awaitConfirmed: boolean
 ): SubmitProofOption {
     return function (opts: SubmitProofOptions) {
         opts.awaitConfirmed = awaitConfirmed;
-    };
-}
-
-export interface GetProofOptions {
-    returnBatch: boolean;
-}
-
-export type GetProofOption = (option: GetProofOptions) => void;
-
-export function getProofWithReturnBatch(returnBatch: boolean): GetProofOption {
-    return function (options: GetProofOptions) {
-        options.returnBatch = returnBatch;
     };
 }
 
@@ -189,19 +168,13 @@ export class Client {
     public getProof(
         hash: string,
         batchId: string,
-        anchorType: anchor.Anchor.Type,
-        ...opts: GetProofOption[]
-    ): Promise<AnchorProof> {
+        anchorType: anchor.Anchor.Type): Promise<AnchorProof> {
         return new Promise<AnchorProof>((res, rej) => {
-            let options: GetProofOptions = {
-                returnBatch: true,
-            };
-            opts.forEach((o) => o(options));
             let req = new anchor.ProofRequest()
                 .setHash(hash)
                 .setBatchId(batchId)
                 .setAnchorType(anchorType)
-                .setWithBatch(options.returnBatch);
+                .setWithBatch(true);
             this.client.getProof(req, (err, r) => {
                 if (err) {
                     rej(err);
@@ -222,7 +195,6 @@ export class Client {
                 anchorType: anchor.Anchor.Type.ETH,
                 format: anchor.Proof.Format.CHP_PATH,
                 skipBatching: false,
-                returnBatch: true,
                 awaitConfirmed: false,
             };
             opts.forEach((o) => o(options));
@@ -232,7 +204,7 @@ export class Client {
                 .setHash(hash)
                 .setFormat(options.format)
                 .setSkipBatching(options.skipBatching)
-                .setWithBatch(options.returnBatch);
+                .setWithBatch(true);
             this.client.submitProof(req, (err, r) => {
                 if (err) {
                     rej(err);
@@ -315,8 +287,7 @@ export class Client {
                         proof.batchId,
                         anchor.Anchor.Type[
                             proof.anchorType as keyof typeof anchor.Anchor.Type
-                        ],
-                        getProofWithReturnBatch(true)
+                        ]
                     )
                         .then((res) => callback(null, res))
                         .catch((err) =>
