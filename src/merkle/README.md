@@ -7,8 +7,6 @@ A library for constructing a Merkle tree.
 - [Getting Started](#getting-started)
     - [Building a MerkleTree](#building-a-merkletree)
     - [Exploring a MerkleTree](#exploring-a-merkletree)
-    - [Creating Proofs](#creating-proofs)
-    - [Verifying Proofs](#verifying-proofs)
     - [Adding Merkle Path to Proof](#adding-merkle-path-to-proof)
     - [MerkleFile](#merklefile)
         - [Export](#export)
