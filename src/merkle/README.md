@@ -35,7 +35,7 @@ of a merkle tree.
 ```js
 import { merkle } from "provendb-sdk-node";
 
-let builder = merkle.builder("sha256");
+let builder = merkle.newBuilder("sha-256");
 ```
 
 Adding items can be done singularly (`add()`), or in bulk (`addBatch()`). Any data being added must
@@ -126,18 +126,22 @@ tree.nLeaves();
 // Retrieves the root hash of the tree. Returns "da63e4bd82fc6e5fd7337e6bd9147d8cada6652d9049020edc6deb69b18cf69c"
 tree.getRoot();
 
+// Retrieve a single leaf. Returns
+// { key: 'key1', hash: '62c66a7a5dd70c3146618063c344e531e6d4b59e379808443ce962b3abd63c5a' }
+tree.getLeaf("key1");
+
 // Retrieves an array of all the leaves in the tree. Returns
 // [
-//   '62c66a7a5dd70c3146618063c344e531e6d4b59e379808443ce962b3abd63c5a',
-//   '3f79bb7b435b05321651daefd374cdc681dc06faa65e374e38337b88ca046dea',
-//   '454349e422f05297191ead13e21d3db520e5abef52055e4964b82fb213f593a1',
-//   '8254c329a92850f6d539dd376f4816ee2764517da5e0235514af433164480d7a',
-//   'acac86c0e609ca906f632b0e2dacccb2b77d22b0621f20ebece1a4835b93f6f0',
-//   '3f79bb7b435b05321651daefd374cdc681dc06faa65e374e38337b88ca046dea',
-//   'e3b98a4da31a127d4bde6e43033f66ba274cab0eb7eb1c70ec41402bf6273dd8',
-//   '454349e422f05297191ead13e21d3db520e5abef52055e4964b82fb213f593a1',
-//   '3f79bb7b435b05321651daefd374cdc681dc06faa65e374e38337b88ca046dea',
-//   '3f79bb7b435b05321651daefd374cdc681dc06faa65e374e38337b88ca046dea'
+//   { key: 'key1', hash: '62c66a7a5dd70c3146618063c344e531e6d4b59e379808443ce962b3abd63c5a' },
+//   { key: 'key2', hash: '3f79bb7b435b05321651daefd374cdc681dc06faa65e374e38337b88ca046dea' },
+//   { key: 'key3', hash: '454349e422f05297191ead13e21d3db520e5abef52055e4964b82fb213f593a1' },
+//   { key: 'key4', hash: '8254c329a92850f6d539dd376f4816ee2764517da5e0235514af433164480d7a' },
+//   { key: 'key5', hash: 'acac86c0e609ca906f632b0e2dacccb2b77d22b0621f20ebece1a4835b93f6f0' },
+//   { key: 'key6', hash: '3f79bb7b435b05321651daefd374cdc681dc06faa65e374e38337b88ca046dea' },
+//   { key: 'key7', hash: 'e3b98a4da31a127d4bde6e43033f66ba274cab0eb7eb1c70ec41402bf6273dd8' },
+//   { key: 'key8', hash: '454349e422f05297191ead13e21d3db520e5abef52055e4964b82fb213f593a1' },
+//   { key: 'key9', hash: '3f79bb7b435b05321651daefd374cdc681dc06faa65e374e38337b88ca046dea' },
+//   { key: 'key10', hash: '3f79bb7b435b05321651daefd374cdc681dc06faa65e374e38337b88ca046dea' }
 // ]
 tree.getLeaves();
 
@@ -171,11 +175,11 @@ tree.getPath("62c66a7a5dd70c3146618063c344e531e6d4b59e379808443ce962b3abd63c5a",
 ### Adding Merkle Path to Proof
 
 If you would like your proof to contain the path to a specific leaf in the tree, you can do this by using
-`getPathWithProof()`. This will calculate the path to the root of the tree, and prepend it to the proof receipt such
+`addPathToProof()`. This will calculate the path to the root of the tree, and prepend it to the proof receipt such
 that the anchored hash can still be calculated.
 
 ```js
-let proof = merkle.addPathToProof(your_proof, Buffer.from("62c66a7a5dd70c3146618063c344e531e6d4b59e379808443ce962b3abd63c5a"), "sha256", tree.getPath("key1"), "my_custom_label");
+let proof = tree.addPathToProof(your_proof, tree,getLeaf("key1"), "my_custom_label");
 ```
 
 A proof with the path should look like the following:
@@ -191,7 +195,7 @@ A proof with the path should look like the following:
     "hash_submitted_core_at": "2021-02-25T21:31:53Z",
     "branches": [
         {
-            "label": "merkle_path_branch",
+            "label": "my_custom_label",
             "ops": [
                 {
                     "r": "3f79bb7b435b05321651daefd374cdc681dc06faa65e374e38337b88ca046dea"
@@ -248,7 +252,7 @@ A `File` is a representation of a merkle tree that this library understands. A `
 | Name | Type | Description |
 | :----| :----| :----------- |
 | algorithm | string | The algorithm used to construct the tree. |
-| proofs | Proof[] | An array of proof objects associated with this tree. |
+| proofs | anchor.AnchorProof[] | An array of anchor proof objects associated with this tree. |
 | data | string[][] | A two-dimensional array that contains the tree data. See [Representation of data](#representation-of-data) |
 
 ### Representation of data
