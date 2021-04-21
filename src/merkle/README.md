@@ -174,12 +174,11 @@ tree.getPath("62c66a7a5dd70c3146618063c344e531e6d4b59e379808443ce962b3abd63c5a",
 
 ### Adding Merkle Path to Proof
 
-If you would like your proof to contain the path to a specific leaf in the tree, you can do this by using
-`addPathToProof()`. This will calculate the path to the root of the tree, and prepend it to the proof receipt such
-that the anchored hash can still be calculated.
+If you have submitted a proof for this tree via the [anchor](../anchor) client, you can add a path from a leaf of this tree to the proof's submitted hash such that the anchored hash can still be calculated. You can do this by using
+`addPathToProof()`. 
 
 ```js
-let proof = tree.addPathToProof(your_proof, tree,getLeaf("key1"), "my_custom_label");
+let proof = tree.addPathToProof(YOUR_ANCHOR_PROOF, tree,getLeaf("key1"), "my_custom_label");
 ```
 
 A proof with the path should look like the following:
