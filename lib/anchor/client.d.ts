@@ -17,19 +17,12 @@ export interface SubmitProofOptions {
     anchorType: anchor.Anchor.Type;
     format: anchor.Proof.Format;
     skipBatching: boolean;
-    returnBatch: boolean;
     awaitConfirmed: boolean;
 }
 export declare function submitProofWithAnchorType(anchorType: any): SubmitProofOption;
 export declare function submitProofWithFormat(format: any): SubmitProofOption;
 export declare function submitProofWithSkipBatching(skipBatching: boolean): SubmitProofOption;
-export declare function submitProofWithReturnBatch(returnBatch: boolean): SubmitProofOption;
 export declare function submitProofWithAwaitConfirmed(awaitConfirmed: boolean): SubmitProofOption;
-export interface GetProofOptions {
-    returnBatch: boolean;
-}
-export declare type GetProofOption = (option: GetProofOptions) => void;
-export declare function getProofWithReturnBatch(returnBatch: boolean): GetProofOption;
 export declare type SubscribeBatchesOption = (option: SubscribeBatchesOptions) => void;
 export interface SubscribeBatchesOptions {
     filter?: {
@@ -47,7 +40,7 @@ export declare class Client {
     getAnchors(): Promise<anchor.Anchor.AsObject[]>;
     getAnchor(anchorType: anchor.Anchor.Type): Promise<anchor.Anchor.AsObject>;
     getBatch(batchId: string, anchorType: anchor.Anchor.Type): Promise<anchor.Batch.AsObject>;
-    getProof(hash: string, batchId: string, anchorType: anchor.Anchor.Type, ...opts: GetProofOption[]): Promise<AnchorProof>;
+    getProof(hash: string, batchId: string, anchorType: anchor.Anchor.Type): Promise<AnchorProof>;
     submitProof(hash: string, ...opts: SubmitProofOption[]): Promise<AnchorProof>;
     subscribeBatch(callback: (err: ServiceError | null, res: anchor.Batch.AsObject) => void, ...opts: SubscribeBatchesOption[]): void;
     subscribeProof(proof: AnchorProof, callback: (err: ServiceError | null, res: AnchorProof) => void): void;
