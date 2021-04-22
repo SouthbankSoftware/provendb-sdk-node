@@ -26,13 +26,13 @@ export interface AnchorProof {
 }
 
 export function toAnchorProof(proof: Proof): AnchorProof {
-    let metadata = {}
+    let metadata = {};
     if (proof.getBatch()) {
         if (proof.getBatch()?.getData() !== "") {
-            metadata = JSON.parse(proof.getBatch()!.getData())
+            metadata = JSON.parse(proof.getBatch()!.getData());
         }
     }
-    let data = {}
+    let data = {};
     if (proof.getData() !== "") {
         data = decodeProof(proof.getData());
     }

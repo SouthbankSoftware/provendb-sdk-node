@@ -3,3 +3,4 @@ export * from "./anchor_pb";
 export * from "./client";
 export * from "./proof";
 export * from "./chainpoint";
+export * from "./util";

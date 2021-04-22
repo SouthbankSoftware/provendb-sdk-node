@@ -106,16 +106,26 @@ export class Tree {
     }
 
     /**
-     * 
+     *
      * @param proof the proof to add the path to
      * @param key the key of the leaf to generate path from
      */
-    addPathToProof(proof: anchor.AnchorProof, key: string, label?: string): anchor.AnchorProof {
+    addPathToProof(
+        proof: anchor.AnchorProof,
+        key: string,
+        label?: string
+    ): anchor.AnchorProof {
         let leaf = this.getLeaf(key);
         if (leaf == null) {
             throw new Error("key '" + key + "' does not exist");
         }
-        return addPathToProof(proof, leaf!.hash, this.algorithm, this.getPath(leaf), label)
+        return addPathToProof(
+            proof,
+            leaf!.hash,
+            this.algorithm,
+            this.getPath(leaf),
+            label
+        );
     }
 
     /**

@@ -1,7 +1,7 @@
 import { Proof } from "./anchor_pb";
 /**
  * AnchorProof is a represention of a Proof object with tasks such as decoding already
- * performed and enums represented as strings.
+ * performed and enums represented as strings for readability.
  */
 export interface AnchorProof {
     id: string;
