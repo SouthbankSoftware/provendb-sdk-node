@@ -40,9 +40,9 @@ export declare class Client {
     getAnchors(): Promise<anchor.Anchor.AsObject[]>;
     getAnchor(anchorType: anchor.Anchor.Type): Promise<anchor.Anchor.AsObject>;
     getBatch(batchId: string, anchorType: anchor.Anchor.Type): Promise<anchor.Batch.AsObject>;
-    getProof(hash: string, batchId: string, anchorType: anchor.Anchor.Type): Promise<AnchorProof>;
+    getProof(id: string, anchorType: string | anchor.Anchor.Type): Promise<AnchorProof>;
     submitProof(hash: string, ...opts: SubmitProofOption[]): Promise<AnchorProof>;
     subscribeBatch(callback: (err: ServiceError | null, res: anchor.Batch.AsObject) => void, ...opts: SubscribeBatchesOption[]): void;
-    subscribeProof(proof: AnchorProof, callback: (err: ServiceError | null, res: AnchorProof) => void): void;
+    subscribeProof(id: string, anchorType: string | anchor.Anchor.Type, callback: (err: ServiceError | null, res: AnchorProof) => void): void;
     verifyProof(data: string, anchorType: anchor.Anchor.Type, format: anchor.Proof.Format): Promise<boolean>;
 }

@@ -1,6 +1,7 @@
 import { encode, decode } from "@msgpack/msgpack";
 import zlib from "zlib";
-import { Anchor, Batch, Proof } from "./anchor_pb";
+import { Proof } from "./anchor_pb";
+import * as util from "./util";
 
 /**
  * AnchorProof is a represention of a Proof object with tasks such as decoding already
@@ -36,70 +37,15 @@ export function toAnchorProof(proof: Proof): AnchorProof {
         data = decodeProof(proof.getData());
     }
     return {
-        id: proof.getHash() + "-" + proof.getBatchId(),
-        anchorType: anchorTypeToString(proof.getAnchorType()),
-        format: proofFormatToString(proof.getFormat()),
+        id: util.getProofId(proof.getHash(), proof.getBatchId()),
+        anchorType: util.getAnchorTypeAsString(proof.getAnchorType()),
+        format: util.getProofFormatAsString(proof.getFormat()),
         batchId: proof.getBatchId(),
         hash: proof.getHash(),
-        status: batchStatusToString(proof.getBatchStatus()),
+        status: util.getBatchStatusAsString(proof.getBatchStatus()),
         metadata: metadata,
         data: data,
     };
-}
-
-function batchStatusToString(status: Batch.Status): string {
-    switch (status) {
-        case Batch.Status.BATCHING:
-            return "BATCHING"
-        case Batch.Status.PENDING:
-            return "PENDING"
-        case Batch.Status.PROCESSING:
-            return "PROCESSING"
-        case Batch.Status.QUEUING:
-            return "QUEUING"
-        case Batch.Status.CONFIRMED:
-            return "CONFIRMED"
-        case Batch.Status.ERROR:
-            return "ERROR"
-    }
-}
-
-function proofFormatToString(format: Proof.Format): string {
-    switch (format) {
-        case Proof.Format.CHP_PATH:
-            return "CHP_PATH"
-        case Proof.Format.CHP_PATH_SIGNED:
-            return "CHP_PATH_SIGNED"
-        case Proof.Format.ETH_TRIE:
-            return "ETH_TRIE"
-        case Proof.Format.ETH_TRIE_SIGNED:
-            return "ETH_TRIE_SIGNED"
-    }
-}
-
-function anchorTypeToString(anchorType: Anchor.Type): string {
-    switch (anchorType) {
-        case Anchor.Type.ETH:
-            return "ETH"
-        case Anchor.Type.ETH_MAINNET:
-            return "ETH_MAINNET"
-        case Anchor.Type.ETH_ELASTOS:
-            return "ETH_ELASTOS"
-        case Anchor.Type.ETH_GOCHAIN:
-            return "ETH_GOCHAIN"
-        case Anchor.Type.BTC:
-            return "BTC"
-        case Anchor.Type.BTC_MAINNET:
-            return "BTC_MAINNET"
-        case Anchor.Type.CHP:
-            return "CHP"
-        case Anchor.Type.HEDERA:
-            return "HEDERA"
-        case Anchor.Type.HEDERA_MAINNET:
-            return "HEDERA_MAINNET"
-        case Anchor.Type.HYPERLEDGER:
-            return "HYPERLEDGER"
-    }
 }
 
 /**

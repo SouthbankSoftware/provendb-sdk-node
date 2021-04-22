@@ -10,6 +10,7 @@ import {
 } from "@grpc/grpc-js";
 import * as google_protobuf_empty_pb from "google-protobuf/google/protobuf/empty_pb";
 import { AnchorProof, toAnchorProof } from "./proof";
+import * as util from "./util";
 
 export type ClientOption = (options: ClientOptions) => void;
 
@@ -165,15 +166,13 @@ export class Client {
         });
     }
 
-    public getProof(
-        hash: string,
-        batchId: string,
-        anchorType: anchor.Anchor.Type): Promise<AnchorProof> {
+    public getProof(id: string, anchorType: string | anchor.Anchor.Type): Promise<AnchorProof> {
+        let s: string[] = id.split(":");
         return new Promise<AnchorProof>((res, rej) => {
             let req = new anchor.ProofRequest()
-                .setHash(hash)
-                .setBatchId(batchId)
-                .setAnchorType(anchorType)
+                .setHash(s[0])
+                .setBatchId(s[1])
+                .setAnchorType(util.getAnchorType(anchorType))
                 .setWithBatch(true);
             this.client.getProof(req, (err, r) => {
                 if (err) {
@@ -211,7 +210,7 @@ export class Client {
                 } else {
                     // If await confirmed is true, we will subscribe to this proof
                     if (options.awaitConfirmed) {
-                        this.subscribeProof(toAnchorProof(r), (err, p) => {
+                        this.subscribeProof(util.getProofId(r.getHash(), r.getBatchId()), options.anchorType, (err, p) => {
                             if (err) {
                                 rej(err);
                             } else {
@@ -260,9 +259,10 @@ export class Client {
     }
 
     public subscribeProof(
-        proof: AnchorProof,
+        id: string, anchorType: string | anchor.Anchor.Type,
         callback: (err: ServiceError | null, res: AnchorProof) => void
     ) {
+        let s: string[] = id.split(":");
         this.subscribeBatch(
             (err: ServiceError | null, res: anchor.Batch.AsObject) => {
                 if (err) {
@@ -282,13 +282,7 @@ export class Client {
                         return;
                     }
                     // Retrieve the updated proof
-                    this.getProof(
-                        proof.hash,
-                        proof.batchId,
-                        anchor.Anchor.Type[
-                            proof.anchorType as keyof typeof anchor.Anchor.Type
-                        ]
-                    )
+                    this.getProof(id, anchorType)
                         .then((res) => callback(null, res))
                         .catch((err) =>
                             callback(err, toAnchorProof(new anchor.Proof()))
@@ -296,11 +290,8 @@ export class Client {
                 }
             },
             subscribeBatchesWithFilter({
-                batchId: proof.batchId,
-                anchorType:
-                    anchor.Anchor.Type[
-                        proof.anchorType as keyof typeof anchor.Anchor.Type
-                    ],
+                batchId: s[1],
+                anchorType: util.getAnchorType(anchorType),
             })
         );
     }
