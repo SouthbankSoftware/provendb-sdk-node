@@ -60,7 +60,7 @@ const abcdefghijklmnop_messageHashed =
     "d5d55c1dba8af00399a878abc75c21d328caa1815cb7fbaa5ad106e6eb9c0fea";
 
 describe("Test Builder", () => {
-    it("Should build correct root hash", () => {
+    it("Should build correct root hash (even leaves)", () => {
         let builder = newBuilder("sha-256");
         builder.add("a", Buffer.from("a"));
         builder.add("b", Buffer.from("b"));
@@ -82,14 +82,6 @@ describe("Test Builder", () => {
             { key: "p", value: Buffer.from("p") },
         ]);
 
-        // let writer = builder.writeStream("message");
-        // let msg = message.split("");
-        // for (let i = 0; i < msg.length; i++) {
-            
-        //     writer.write(Buffer.from(msg[i]));    
-        // }
-        // writer.close();
-
         let tree = builder.build();
 
         let l4 = ["a:"+a, "b:"+b,"c:"+c,"d:"+d,"e:"+e,"f:"+f,"g:"+g,"h:"+h,"i:"+i,"j:"+j,"k:"+k,"l:"+l,"m:"+m,"n:"+n,"o:"+o,"p:"+p];
@@ -97,6 +89,42 @@ describe("Test Builder", () => {
         let l2 = [abcd, efgh, ijkl, mnop]
         let l1 = [abcdefgh, ijklmnop]
         let l0 = [abcdefghijklmnop]
+
+        expect(tree.getLevel(0)).toEqual(l0);
+        expect(tree.getLevel(1)).toEqual(l1);
+        expect(tree.getLevel(2)).toEqual(l2);
+        expect(tree.getLevel(3)).toEqual(l3);
+        expect(tree.getLevel(4)).toEqual(l4);
+    });
+
+    it("Should build correct root hash (odd leaves)", () => {
+        let builder = newBuilder("sha-256");
+        builder.add("a", Buffer.from("a"));
+        builder.add("b", Buffer.from("b"));
+        builder.add("c", Buffer.from("c"));
+        builder.add("d", Buffer.from("d"));
+        builder.add("e", Buffer.from("e"));
+        builder.add("f", Buffer.from("f"));
+        builder.add("g", Buffer.from("g"));
+        builder.add("h", Buffer.from("h"));
+
+        builder.addBatch([
+            { key: "i", value: Buffer.from("i") },
+            { key: "j", value: Buffer.from("j") },
+            { key: "k", value: Buffer.from("k") },
+            { key: "l", value: Buffer.from("l") },
+            { key: "m", value: Buffer.from("m") },
+            { key: "n", value: Buffer.from("n") },
+            { key: "o", value: Buffer.from("o") },
+        ]);
+
+        let tree = builder.build();
+
+        let l4 = ["a:"+a, "b:"+b,"c:"+c,"d:"+d,"e:"+e,"f:"+f,"g:"+g,"h:"+h,"i:"+i,"j:"+j,"k:"+k,"l:"+l,"m:"+m,"n:"+n,"o:"+o];
+        let l3 = [ab, cd, ef, gh, ij, kl, mn, o]
+        let l2 = [abcd, efgh, ijkl, mno]
+        let l1 = [abcdefgh, ijklmno]
+        let l0 = [abcdefghijklmno]
 
         expect(tree.getLevel(0)).toEqual(l0);
         expect(tree.getLevel(1)).toEqual(l1);
