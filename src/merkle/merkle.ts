@@ -10,7 +10,7 @@ export interface Leaf {
     // Key.
     key: string;
     // Hex encoded hash.
-    hash: string;
+    value: string;
 }
 
 /**
@@ -124,9 +124,9 @@ export class Tree {
         }
         return addPathToProof(
             proof,
-            leaf!.hash,
+            leaf!.value,
             this.algorithm,
-            this.getPath(leaf),
+            this.getPath(leaf.key),
             label
         );
     }
@@ -143,7 +143,7 @@ export class Tree {
         this.layers[0].forEach((v) => {
             let s: string[] = v.split(":");
             if (s[0] === key) {
-                leaf = { key: s[0], hash: s[1] };
+                leaf = { key: s[0], value: s[1] };
                 return;
             }
         });
@@ -157,7 +157,7 @@ export class Tree {
         let leaves: Leaf[] = [];
         this.layers[0].forEach((v) => {
             let s: string[] = v.split(":");
-            leaves.push({ key: s[0], hash: s[1] });
+            leaves.push({ key: s[0], value: s[1] });
         });
         return leaves;
     }
@@ -182,13 +182,17 @@ export class Tree {
      * Retrieves the path to the root from the leaf.
      * @param leaf the leaf
      */
-    getPath(leaf: Leaf): Path[] {
-        let hash = leaf.hash;
+    getPath(key: string): Path[] {
+        let leaf = this.getLeaf(key);
+        if (leaf === null) {
+            return [];
+        }
+        let hash = leaf.value;
         let path: Path[] = [];
         // Find the leaf first
         let index = -1;
         for (let i = 0; i < this.layers[0].length; i++) {
-            if (this.layers[0][i] === hash) {
+            if (this.layers[0][i].split(":")[1] === hash) {
                 index = i;
             }
         }
@@ -202,9 +206,22 @@ export class Tree {
             let layer = this.layers[i];
             let isRight = index % 2 !== 0;
             if (isRight) {
-                path.push({ l: layer[index - 1] });
+                let l = layer[index - 1];
+                if (l.includes(":")) {
+                    l = l.split(":")[1]
+                }
+                path.push({ l: l });
             } else {
-                path.push({ r: layer[index + 1] });
+                // Check if this is an odd node on the end and skip
+                if ((index + 1) === (layer.length)) {
+                    index = (index / 2) | 0;
+                    continue;
+                }
+                let r = layer[index + 1];
+                if (r.includes(":")) {
+                    r = r.split(":")[1]
+                }
+                path.push({ r: r});
             }
             index = (index / 2) | 0;
         }
@@ -259,7 +276,7 @@ export class Tree {
     verify(): boolean {
         let current: string[] = [];
         let leaves = this.getLeaves();
-        leaves.forEach((l) => current.push(l.hash));
+        leaves.forEach((l) => current.push(l.value));
         let layer = [];
         // Loop through until we have a single node i.e. root hash.
         while (current.length > 1) {

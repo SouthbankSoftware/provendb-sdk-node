@@ -5,7 +5,7 @@ import { anchor } from "..";
  */
 export interface Leaf {
     key: string;
-    hash: string;
+    value: string;
 }
 /**
  * A file representation of a merkle tree.
@@ -88,10 +88,15 @@ export declare class Tree {
      */
     getLevel(level: number): string[];
     /**
+     * Retrieves all the levels in this tree.
+     * @returns the levels
+     */
+    getLevels(): string[][];
+    /**
      * Retrieves the path to the root from the leaf.
      * @param leaf the leaf
      */
-    getPath(leaf: Leaf): Path[];
+    getPath(key: string): Path[];
     /**
      * Retrieves the proof, if any, for this tree.
      */

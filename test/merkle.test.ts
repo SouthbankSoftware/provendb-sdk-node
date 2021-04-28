@@ -1,4 +1,4 @@
-import { Builder, newBuilder } from "../src/merkle/merkle";
+import { Builder, newBuilder, Path } from "../src/merkle/merkle";
 // The leaves (a, b, c, ... p) are hashed using a utf8 encoded string, and all hashes following are hashed
 // using hex encoded strings. There should be enough data here to create your test cases.
 const a = "ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb";
@@ -59,8 +59,8 @@ const messageHashed =
 const abcdefghijklmnop_messageHashed =
     "d5d55c1dba8af00399a878abc75c21d328caa1815cb7fbaa5ad106e6eb9c0fea";
 
-describe("Test Builder", () => {
-    it("Should build correct root hash (even leaves)", () => {
+describe("Test Tree", () => {
+    it("Should build correct tree (even leaves)", () => {
         let builder = newBuilder("sha-256");
         builder.add("a", Buffer.from("a"));
         builder.add("b", Buffer.from("b"));
@@ -84,20 +84,173 @@ describe("Test Builder", () => {
 
         let tree = builder.build();
 
-        let l4 = ["a:"+a, "b:"+b,"c:"+c,"d:"+d,"e:"+e,"f:"+f,"g:"+g,"h:"+h,"i:"+i,"j:"+j,"k:"+k,"l:"+l,"m:"+m,"n:"+n,"o:"+o,"p:"+p];
-        let l3 = [ab, cd, ef, gh, ij, kl, mn, op]
-        let l2 = [abcd, efgh, ijkl, mnop]
-        let l1 = [abcdefgh, ijklmnop]
-        let l0 = [abcdefghijklmnop]
+        let levels = [
+            ["a:"+a, "b:"+b,"c:"+c,"d:"+d,"e:"+e,"f:"+f,"g:"+g,"h:"+h,"i:"+i,"j:"+j,"k:"+k,"l:"+l,"m:"+m,"n:"+n,"o:"+o,"p:"+p],
+            [ab, cd, ef, gh, ij, kl, mn, op],
+            [abcd, efgh, ijkl, mnop],
+            [abcdefgh, ijklmnop],
+            [abcdefghijklmnop]
+        ]
 
-        expect(tree.getLevel(0)).toEqual(l0);
-        expect(tree.getLevel(1)).toEqual(l1);
-        expect(tree.getLevel(2)).toEqual(l2);
-        expect(tree.getLevel(3)).toEqual(l3);
-        expect(tree.getLevel(4)).toEqual(l4);
+        // Validate tree information
+        expect(tree.getLevel(0)).toEqual(levels[4]);
+        expect(tree.getLevel(1)).toEqual(levels[3]);
+        expect(tree.getLevel(2)).toEqual(levels[2]);
+        expect(tree.getLevel(3)).toEqual(levels[1]);
+        expect(tree.getLevel(4)).toEqual(levels[0]);
+
+        expect(tree.getLevels()).toEqual(levels);
+
+        expect(tree.getLeaf("a")).toEqual({ key: "a", value: a})
+        expect(tree.getLeaf("b")).toEqual({ key: "b", value: b})
+        expect(tree.getLeaf("c")).toEqual({ key: "c", value: c})
+        expect(tree.getLeaf("d")).toEqual({ key: "d", value: d})
+        expect(tree.getLeaf("e")).toEqual({ key: "e", value: e})
+        expect(tree.getLeaf("f")).toEqual({ key: "f", value: f})
+        expect(tree.getLeaf("g")).toEqual({ key: "g", value: g})
+        expect(tree.getLeaf("h")).toEqual({ key: "h", value: h})
+        expect(tree.getLeaf("i")).toEqual({ key: "i", value: i})
+        expect(tree.getLeaf("j")).toEqual({ key: "j", value: j})
+        expect(tree.getLeaf("k")).toEqual({ key: "k", value: k})
+        expect(tree.getLeaf("l")).toEqual({ key: "l", value: l})
+        expect(tree.getLeaf("m")).toEqual({ key: "m", value: m})
+        expect(tree.getLeaf("n")).toEqual({ key: "n", value: n})
+        expect(tree.getLeaf("o")).toEqual({ key: "o", value: o})
+        expect(tree.getLeaf("p")).toEqual({ key: "p", value: p})
+
+        expect(tree.getAlgorithm()).toEqual("sha-256");
+
+        let pathA: Path[] = [
+            {r: b},
+            {r: cd},
+            {r: efgh},
+            {r: ijklmnop},
+        ]
+
+        let pathB: Path[] = [
+            {l: a},
+            {r: cd},
+            {r: efgh},
+            {r: ijklmnop},
+        ]
+
+        let pathC: Path[] = [
+            {r: d},
+            {l: ab},
+            {r: efgh},
+            {r: ijklmnop},
+        ]
+
+        let pathD: Path[] = [
+            {l: c},
+            {l: ab},
+            {r: efgh},
+            {r: ijklmnop}
+        ]
+
+        let pathE: Path[] = [
+            {r: f},
+            {r: gh},
+            {l: abcd},
+            {r: ijklmnop}
+        ]
+
+        let pathF: Path[] = [
+            {l: e},
+            {r: gh},
+            {l: abcd},
+            {r: ijklmnop}
+        ]
+
+        let pathG: Path[] = [
+            {r: h},
+            {l: ef},
+            {l: abcd},
+            {r: ijklmnop}
+        ]
+
+        let pathH: Path[] = [
+            {l: g},
+            {l: ef},
+            {l: abcd},
+            {r: ijklmnop}
+        ]
+
+        let pathI: Path[] = [
+            {r: j},
+            {r: kl},
+            {r: mnop},
+            {l: abcdefgh}
+        ]
+
+        let pathJ: Path[] = [
+            {l: i},
+            {r: kl},
+            {r: mnop},
+            {l: abcdefgh}
+        ]
+
+        let pathK: Path[] = [
+            {r: l},
+            {l: ij},
+            {r: mnop},
+            {l: abcdefgh},
+        ]
+
+        let pathL: Path[] = [
+            {l: k},
+            {l: ij},
+            {r: mnop},
+            {l: abcdefgh}
+        ]
+
+        let pathM: Path[] = [
+            {r: n},
+            {r: op},
+            {l: ijkl},
+            {l: abcdefgh}
+        ]
+
+        let pathN: Path[] = [
+            {l: m},
+            {r: op},
+            {l: ijkl},
+            {l: abcdefgh}
+        ]
+
+        let pathO: Path[] = [
+            {r: p},
+            {l: mn},
+            {l: ijkl},
+            {l: abcdefgh},
+        ]
+
+        let pathP: Path[] = [
+            {l: o},
+            {l: mn},
+            {l: ijkl},
+            {l: abcdefgh}
+        ]
+
+        expect(tree.getPath("a")).toEqual(pathA);
+        expect(tree.getPath("b")).toEqual(pathB);
+        expect(tree.getPath("c")).toEqual(pathC);
+        expect(tree.getPath("d")).toEqual(pathD);
+        expect(tree.getPath("e")).toEqual(pathE);
+        expect(tree.getPath("f")).toEqual(pathF);
+        expect(tree.getPath("g")).toEqual(pathG);
+        expect(tree.getPath("h")).toEqual(pathH);
+        expect(tree.getPath("i")).toEqual(pathI);
+        expect(tree.getPath("j")).toEqual(pathJ);
+        expect(tree.getPath("k")).toEqual(pathK);
+        expect(tree.getPath("l")).toEqual(pathL);
+        expect(tree.getPath("m")).toEqual(pathM);
+        expect(tree.getPath("n")).toEqual(pathN);
+        expect(tree.getPath("o")).toEqual(pathO);
+        expect(tree.getPath("p")).toEqual(pathP);
     });
 
-    it("Should build correct root hash (odd leaves)", () => {
+    it("Should build correct tree (odd leaves)", () => {
         let builder = newBuilder("sha-256");
         builder.add("a", Buffer.from("a"));
         builder.add("b", Buffer.from("b"));
@@ -131,5 +284,144 @@ describe("Test Builder", () => {
         expect(tree.getLevel(2)).toEqual(l2);
         expect(tree.getLevel(3)).toEqual(l3);
         expect(tree.getLevel(4)).toEqual(l4);
+
+        expect(tree.getLeaf("a")).toEqual({ key: "a", value: a})
+        expect(tree.getLeaf("b")).toEqual({ key: "b", value: b})
+        expect(tree.getLeaf("c")).toEqual({ key: "c", value: c})
+        expect(tree.getLeaf("d")).toEqual({ key: "d", value: d})
+        expect(tree.getLeaf("e")).toEqual({ key: "e", value: e})
+        expect(tree.getLeaf("f")).toEqual({ key: "f", value: f})
+        expect(tree.getLeaf("g")).toEqual({ key: "g", value: g})
+        expect(tree.getLeaf("h")).toEqual({ key: "h", value: h})
+        expect(tree.getLeaf("i")).toEqual({ key: "i", value: i})
+        expect(tree.getLeaf("j")).toEqual({ key: "j", value: j})
+        expect(tree.getLeaf("k")).toEqual({ key: "k", value: k})
+        expect(tree.getLeaf("l")).toEqual({ key: "l", value: l})
+        expect(tree.getLeaf("m")).toEqual({ key: "m", value: m})
+        expect(tree.getLeaf("n")).toEqual({ key: "n", value: n})
+        expect(tree.getLeaf("o")).toEqual({ key: "o", value: o})
+
+        expect(tree.getAlgorithm()).toEqual("sha-256");
+
+        // Validate paths
+        let pathA: Path[] = [
+            {r: b},
+            {r: cd},
+            {r: efgh},
+            {r: ijklmno},
+        ]
+
+        let pathB: Path[] = [
+            {l: a},
+            {r: cd},
+            {r: efgh},
+            {r: ijklmno},
+        ]
+
+        let pathC: Path[] = [
+            {r: d},
+            {l: ab},
+            {r: efgh},
+            {r: ijklmno},
+        ]
+
+        let pathD: Path[] = [
+            {l: c},
+            {l: ab},
+            {r: efgh},
+            {r: ijklmno}
+        ]
+
+        let pathE: Path[] = [
+            {r: f},
+            {r: gh},
+            {l: abcd},
+            {r: ijklmno}
+        ]
+
+        let pathF: Path[] = [
+            {l: e},
+            {r: gh},
+            {l: abcd},
+            {r: ijklmno}
+        ]
+
+        let pathG: Path[] = [
+            {r: h},
+            {l: ef},
+            {l: abcd},
+            {r: ijklmno}
+        ]
+
+        let pathH: Path[] = [
+            {l: g},
+            {l: ef},
+            {l: abcd},
+            {r: ijklmno}
+        ]
+
+        let pathI: Path[] = [
+            {r: j},
+            {r: kl},
+            {r: mno},
+            {l: abcdefgh}
+        ]
+
+        let pathJ: Path[] = [
+            {l: i},
+            {r: kl},
+            {r: mno},
+            {l: abcdefgh}
+        ]
+
+        let pathK: Path[] = [
+            {r: l},
+            {l: ij},
+            {r: mno},
+            {l: abcdefgh},
+        ]
+
+        let pathL: Path[] = [
+            {l: k},
+            {l: ij},
+            {r: mno},
+            {l: abcdefgh}
+        ]
+
+        let pathM: Path[] = [
+            {r: n},
+            {r: o},
+            {l: ijkl},
+            {l: abcdefgh}
+        ]
+
+        let pathN: Path[] = [
+            {l: m},
+            {r: o},
+            {l: ijkl},
+            {l: abcdefgh}
+        ]
+
+        let pathO: Path[] = [
+            {l: mn},
+            {l: ijkl},
+            {l: abcdefgh},
+        ]
+
+        expect(tree.getPath("a")).toEqual(pathA);
+        expect(tree.getPath("b")).toEqual(pathB);
+        expect(tree.getPath("c")).toEqual(pathC);
+        expect(tree.getPath("d")).toEqual(pathD);
+        expect(tree.getPath("e")).toEqual(pathE);
+        expect(tree.getPath("f")).toEqual(pathF);
+        expect(tree.getPath("g")).toEqual(pathG);
+        expect(tree.getPath("h")).toEqual(pathH);
+        expect(tree.getPath("i")).toEqual(pathI);
+        expect(tree.getPath("j")).toEqual(pathJ);
+        expect(tree.getPath("k")).toEqual(pathK);
+        expect(tree.getPath("l")).toEqual(pathL);
+        expect(tree.getPath("m")).toEqual(pathM);
+        expect(tree.getPath("n")).toEqual(pathN);
+        expect(tree.getPath("o")).toEqual(pathO);
     });
 });
