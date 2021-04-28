@@ -98,8 +98,6 @@ describe("Test Builder", () => {
         let l1 = [abcdefgh, ijklmnop]
         let l0 = [abcdefghijklmnop]
 
-        
-        console.log(tree.getLevels());
         expect(tree.getLevel(0)).toEqual(l0);
         expect(tree.getLevel(1)).toEqual(l1);
         expect(tree.getLevel(2)).toEqual(l2);

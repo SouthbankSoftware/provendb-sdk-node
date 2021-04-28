@@ -378,12 +378,23 @@ export class Builder {
             for (let i = 0; i < nodes.length; i += 2) {
                 // If we have an odd node, we promote it.
                 if (i + 1 === nodes.length) {
-                    this.layers[layerIndex].push(nodes[i]);
+                    let s: string = nodes[i];
+                    if (nodes[i].includes(":")) {
+                        s = nodes[i].split(":")[1];
+                    }
+                    this.layers[layerIndex].push(s);
                 } else {
+                    // If at least one node includes a key, split both.
+                    let s1: string = nodes[i];
+                    let s2: string = nodes[i + 1];
+                    if (nodes[i].includes(":")) {
+                        s1 = nodes[i].split(":")[1];
+                        s2 = nodes[i + 1].split(":")[1];
+                    }
                     var hash = this.createHash(
                         Buffer.concat([
-                            Buffer.from(nodes[i], "hex"),
-                            Buffer.from(nodes[i + 1], "hex"),
+                            Buffer.from(s1, "hex"),
+                            Buffer.from(s2, "hex"),
                         ])
                     );
                     this.layers[layerIndex].push(hash);
