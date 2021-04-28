@@ -2,7 +2,8 @@ import * as anchor from "../anchor";
 import { Path } from "./merkle";
 
 /**
- *
+ * Adds a merkle path to an existing proof.
+ * 
  * @param proof the proof to add the path to
  * @param hash the hash the path begins at
  * @param algorithm the algorithm used to construct the path
@@ -35,15 +36,15 @@ function addPathCHP(
     label?: string
 ): anchor.AnchorProof {
     // Create new path branch
-    let p: anchor.Chainpoint.V3.Proof = anchor.Chainpoint.V3.parse(proof.data);
-    let branch: anchor.Chainpoint.V3.Branch = {
+    let p: any = Object.assign({}, proof.data);
+    let branch: any = {
         label: label,
         ops: [],
         branches: p.branches,
     };
     // Loop through each path element and create a CHP path.
     for (let i = 0; i < path.length; i++) {
-        let value: anchor.Chainpoint.V3.Operation = {
+        let value: any = {
             l: path[i].l,
             r: path[i].r,
         };

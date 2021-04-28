@@ -38,7 +38,7 @@ To submit a proof with options:
 
 ```js
 let proof = client.submitProof("da63e4bd82fc6e5fd7337e6bd9147d8cada6652d9049020edc6deb69b18cf69c", 
-    anchor.submitProofWithAnchorType(anchor.Anchor.Type.ETH), // your chosen anchor type
+    anchor.submitProofWithAnchorType(anchor.Anchor.Type.HEDERA_MAINNET), // your chosen anchor type
     anchor.submitProofWithSkipBatching(true), // whether to anchor immediately and skip the batching process
     anchor.submitProofWithFormat(anchor.Proof.Format.CHP_PATH),  // the proof format
     anchor.submitProofWithAwaitConfirmed(true)) // whether to return only when the proof status is CONFIRMED.
@@ -71,4 +71,4 @@ let updated = await getProof(proof.hash, proof.batchId, proof.anchorType)
 
 ## Documentation
 
-Full API documentation not yet available. You can browse the source code in the meantime to see available functions.
+Full API documentation not yet available.

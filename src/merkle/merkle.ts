@@ -3,6 +3,9 @@ import fs from "fs";
 import { anchor } from "..";
 import { addPathToProof } from "./proof";
 
+/**
+ * Leaf represents a single leaf in a merkle tree.
+ */
 export interface Leaf {
     // Key.
     key: string;
@@ -11,7 +14,7 @@ export interface Leaf {
 }
 
 /**
- * MerkleFile represents an exported file of a merkle tree.
+ * A file representation of a merkle tree.
  */
 export interface File {
     /**
@@ -168,6 +171,14 @@ export class Tree {
     }
 
     /**
+     * Retrieves all the levels in this tree.
+     * @returns the levels
+     */
+    getLevels(): string[][] {
+        return this.layers;
+    }
+
+    /**
      * Retrieves the path to the root from the leaf.
      * @param leaf the leaf
      */
@@ -278,7 +289,7 @@ export class Tree {
 }
 
 /**
- *
+ * A writer to generate a hash for large data that can be streamed in.
  */
 export class Writer {
     private hasher: crypto.Hash;
@@ -288,7 +299,7 @@ export class Writer {
         private key: string,
         private callback: (key: string, hex: string) => void
     ) {
-        this.hasher = crypto.createHash(algorithm);
+        this.hasher = crypto.createHash(normalizeAlgorithm(algorithm));
     }
 
     write(data: Buffer) {
@@ -336,8 +347,8 @@ export class Builder {
      * this stream, the final hash is added once the close() method has been called.
      */
     writeStream(key: string): Writer {
-        return new Writer(this.algorithm, key, (hex: string) => {
-            this.layers[0].push(hex);
+        return new Writer(this.algorithm, key, (key: string, hex: string) => {
+            this.layers[0].push(key + ":" + hex);
         });
     }
 

@@ -1,6 +1,7 @@
 import * as anchor from "../anchor";
 import { Path } from "./merkle";
 /**
+ * Adds a merkle path to an existing proof.
  *
  * @param proof the proof to add the path to
  * @param hash the hash the path begins at

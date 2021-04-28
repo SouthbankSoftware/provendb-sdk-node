@@ -9,23 +9,39 @@ import {
     ServiceError,
 } from "@grpc/grpc-js";
 import * as google_protobuf_empty_pb from "google-protobuf/google/protobuf/empty_pb";
-import { AnchorProof, toAnchorProof } from "./proof";
+import { AnchorProof, encodeProof, toAnchorProof } from "./proof";
 import * as util from "./util";
 
 export type ClientOption = (options: ClientOptions) => void;
 
+/**
+ * Option to specifiy the Anchor service address.
+ * @param address the address
+ * @returns the option
+ */
 export function withAddress(address: string): ClientOption {
     return function (opts: ClientOptions) {
         opts.address = address;
     };
 }
 
+/**
+ * Option to disable SSL/TLS for the connection.
+ * 
+ * @param insecure true to disable, else false.
+ * @returns the option
+ */
 export function withInsecure(insecure: boolean): ClientOption {
     return function (opts: ClientOptions) {
         opts.insecure = insecure;
     };
 }
 
+/**
+ * Option to specifiy the credentials for authentication.
+ * @param credentials the credentials
+ * @returns the option
+ */
 export function withCredentials(credentials: string): ClientOption {
     return function (opts: ClientOptions) {
         opts.credentials = credentials;
@@ -55,7 +71,7 @@ export function connect(...opts: ClientOption[]): Client {
     );
 }
 
-export interface ClientOptions {
+interface ClientOptions {
     address: string;
     insecure: boolean;
     credentials: string;
@@ -63,7 +79,7 @@ export interface ClientOptions {
 
 export type SubmitProofOption = (options: SubmitProofOptions) => void;
 
-export interface SubmitProofOptions {
+interface SubmitProofOptions {
     anchorType: anchor.Anchor.Type;
     format: anchor.Proof.Format;
     skipBatching: boolean;
@@ -128,13 +144,18 @@ export function submitProofWithAwaitConfirmed(
 
 export type SubscribeBatchesOption = (option: SubscribeBatchesOptions) => void;
 
-export interface SubscribeBatchesOptions {
+interface SubscribeBatchesOptions {
     filter?: {
         batchId: string;
         anchorType: anchor.Anchor.Type;
     };
 }
 
+/**
+ * Option to subscribe to a batch using a filter.
+ * @param filter the filter
+ * @returns the option
+ */
 export function subscribeBatchesWithFilter(filter: {
     batchId: string;
     anchorType: anchor.Anchor.Type;
@@ -144,9 +165,17 @@ export function subscribeBatchesWithFilter(filter: {
     };
 }
 
+/**
+ * A client for the ProvenDB Anchor service. To construct a new client,
+ * use {@link connect()}.
+ */
 export class Client {
     constructor(private client: service.AnchorServiceClient) {}
 
+    /**
+     * Retrieves all available anchors.
+     * @returns an array of anchors
+     */
     public getAnchors(): Promise<anchor.Anchor.AsObject[]> {
         return new Promise<anchor.Anchor.AsObject[]>((res, rej) => {
             let r: ClientReadableStream<anchor.Anchor> = this.client.getAnchors(
@@ -165,6 +194,12 @@ export class Client {
         });
     }
 
+    /**
+     * Retrieves the availability of a single anchor.
+     * 
+     * @param anchorType the anchor type
+     * @returns the anchor
+     */
     public getAnchor(
         anchorType: anchor.Anchor.Type
     ): Promise<anchor.Anchor.AsObject> {
@@ -299,6 +334,13 @@ export class Client {
         });
     }
 
+    /**
+     * Subscribes to batch updates. Batch updates end once a batch is either
+     * CONFIRMED or ERROR status.
+     *
+     * @param callback a callback to retrieve the updates (or error).
+     * @param opts subscription options
+     */
     public subscribeBatch(
         callback: (
             err: ServiceError | null,
@@ -376,16 +418,18 @@ export class Client {
         );
     }
 
-    public verifyProof(
-        data: string,
-        anchorType: anchor.Anchor.Type,
-        format: anchor.Proof.Format
-    ): Promise<boolean> {
+    /**
+     * Verifies the given proof.
+     * 
+     * @param proof the proof to verify
+     * @returns true if verified, else false.
+     */
+    public verifyProof(proof: AnchorProof): Promise<boolean> {
         return new Promise<boolean>((res, rej) => {
             let req: anchor.VerifyProofRequest = new anchor.VerifyProofRequest()
-                .setData(data)
-                .setAnchorType(anchorType)
-                .setFormat(format);
+                .setData(encodeProof(proof.data))
+                .setAnchorType(util.getAnchorType(proof.anchorType))
+                .setFormat(util.getProofFormat(proof.format));
             this.client.verifyProof(
                 req,
                 (err: ServiceError | null, r: anchor.VerifyProofReply) => {

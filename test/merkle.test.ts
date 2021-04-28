@@ -2,7 +2,7 @@ import { Builder, newBuilder } from "../src/merkle/merkle";
 // The leaves (a, b, c, ... p) are hashed using a utf8 encoded string, and all hashes following are hashed
 // using hex encoded strings. There should be enough data here to create your test cases.
 const a = "ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb";
-const b = "c3e23e8160039594a33894f6564e1b1348bbd7a0088d42c4acb73eeaed59c009d";
+const b = "3e23e8160039594a33894f6564e1b1348bbd7a0088d42c4acb73eeaed59c009d";
 const c = "2e7d2c03a9507ae265ecf5b5356885a53393a2029d241394997265a1a25aefc6";
 const d = "18ac3e7343f016890c510e93f935261169d9e3f565436429830faf0934f4f8e4";
 const e = "3f79bb7b435b05321651daefd374cdc681dc06faa65e374e38337b88ca046dea";
@@ -61,19 +61,49 @@ const abcdefghijklmnop_messageHashed =
 
 describe("Test Builder", () => {
     it("Should build correct root hash", () => {
-        let builder = newBuilder("sha256");
+        let builder = newBuilder("sha-256");
         builder.add("a", Buffer.from("a"));
         builder.add("b", Buffer.from("b"));
         builder.add("c", Buffer.from("c"));
-        builder.add("d", Buffer.from(d));
-        builder.add("e", Buffer.from(e));
-        builder.add("f", Buffer.from(f));
-        builder.add("g", Buffer.from(g));
-        builder.add("h", Buffer.from(h));
+        builder.add("d", Buffer.from("d"));
+        builder.add("e", Buffer.from("e"));
+        builder.add("f", Buffer.from("f"));
+        builder.add("g", Buffer.from("g"));
+        builder.add("h", Buffer.from("h"));
 
         builder.addBatch([
-            { key: "i", value: Buffer.from(i) },
-            { key: "", value: Buffer.from(i) },
+            { key: "i", value: Buffer.from("i") },
+            { key: "j", value: Buffer.from("j") },
+            { key: "k", value: Buffer.from("k") },
+            { key: "l", value: Buffer.from("l") },
+            { key: "m", value: Buffer.from("m") },
+            { key: "n", value: Buffer.from("n") },
+            { key: "o", value: Buffer.from("o") },
+            { key: "p", value: Buffer.from("p") },
         ]);
+
+        // let writer = builder.writeStream("message");
+        // let msg = message.split("");
+        // for (let i = 0; i < msg.length; i++) {
+            
+        //     writer.write(Buffer.from(msg[i]));    
+        // }
+        // writer.close();
+
+        let tree = builder.build();
+
+        let l4 = ["a:"+a, "b:"+b,"c:"+c,"d:"+d,"e:"+e,"f:"+f,"g:"+g,"h:"+h,"i:"+i,"j:"+j,"k:"+k,"l:"+l,"m:"+m,"n:"+n,"o:"+o,"p:"+p];
+        let l3 = [ab, cd, ef, gh, ij, kl, mn, op]
+        let l2 = [abcd, efgh, ijkl, mnop]
+        let l1 = [abcdefgh, ijklmnop]
+        let l0 = [abcdefghijklmnop]
+
+        
+        console.log(tree.getLevels());
+        expect(tree.getLevel(0)).toEqual(l0);
+        expect(tree.getLevel(1)).toEqual(l1);
+        expect(tree.getLevel(2)).toEqual(l2);
+        expect(tree.getLevel(3)).toEqual(l3);
+        expect(tree.getLevel(4)).toEqual(l4);
     });
 });

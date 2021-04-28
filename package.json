@@ -9,7 +9,8 @@
     "build": "npm run clean && tsc",
     "format": "prettier --config .prettierrc 'src/**/*.ts' --write",
     "test": "jest",
-    "docs":"typedoc src/index.ts",
+    "docs-clean": "rm -rf docs",
+    "docs": "npm run docs-clean && typedoc src/index.ts",
     "playground": "npm run build && node lib/merkle.playground.js",
     "start": "npm run build && node lib/index.js",
     "proto-gen-anchor": "protoc --plugin=protoc-gen-ts=./node_modules/.bin/protoc-gen-ts --plugin=protoc-gen-grpc=./node_modules/.bin/grpc_tools_node_protoc_plugin --ts_out=grpc_js:./src --js_out=import_style=commonjs,binary:./src --grpc_out=grpc_js:./src -I $PROVENDB_APIS $PROVENDB_APIS/anchor/anchor.proto"
@@ -19,7 +20,7 @@
     "url": "git+https://github.com/SouthbankSoftware/provendb-sdk-node.git"
   },
   "author": "Southbank Software Pty Ltd",
-  "license": "ISC",
+  "license": "AGPL-3.0-only",
   "bugs": {
     "url": "https://github.com/SouthbankSoftware/provendb-sdk-node/issues"
   },

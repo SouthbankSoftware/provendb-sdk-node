@@ -1,11 +1,14 @@
 /// <reference types="node" />
 import { anchor } from "..";
+/**
+ * Leaf represents a single leaf in a merkle tree.
+ */
 export interface Leaf {
     key: string;
     hash: string;
 }
 /**
- * MerkleFile represents an exported file of a merkle tree.
+ * A file representation of a merkle tree.
  */
 export interface File {
     /**
@@ -119,7 +122,7 @@ export declare class Tree {
     verify(): boolean;
 }
 /**
- *
+ * A writer to generate a hash for large data that can be streamed in.
  */
 export declare class Writer {
     private algorithm;
