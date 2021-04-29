@@ -3,6 +3,10 @@ The ProvenDB SDK for Node.
 
 **NOTE**: The SDK is still in alpha stages and not recommended for production use. For any bugs, please raise an [issue](https://github.com/SouthbankSoftware/provendb-sdk-node/issues).
 
+## Installation
+
+`npm install provendb-sdk-node`
+
 ## Libraries
 
 | Name | Description | Import |
@@ -20,8 +24,7 @@ a merkle tree and submit the tree's root hash to the blockchain via the ProvenDB
 First, we need to construct our merkle tree:
 
 ```js
-import { anchor } from "provendb-sdk-node";
-import { merkle } from "provendb-sdk-node";
+import { anchor, merkle } from "provendb-sdk-node";
 
 // Create the new builder
 let builder = merkle.newBuilder("sha-256");
@@ -37,7 +40,7 @@ let tree = builder.build();
 // of the merkle tree and submit it to the ProvenDB Anchor service. Create your new anchor client.
 let client = anchor.connect(anchor.withCredentials("YOUR_API_KEY"));
 
-// Create your proof.
+// Submit your proof.
 let proof = await client.submitProof(tree.getRoot(), 
     anchor.submitProofWithAnchorType(anchor.Anchor.Type.HEDERA_MAINNET), // Optional. Add your anchor type.
     anchor.submitProofWithAwaitConfirmed(true)); // Optional. Resolve the promise only when the proof is confirmed.
