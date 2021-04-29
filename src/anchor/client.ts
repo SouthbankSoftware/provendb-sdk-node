@@ -27,7 +27,7 @@ export function withAddress(address: string): ClientOption {
 
 /**
  * Option to disable SSL/TLS for the connection.
- * 
+ *
  * @param insecure true to disable, else false.
  * @returns the option
  */
@@ -196,7 +196,7 @@ export class Client {
 
     /**
      * Retrieves the availability of a single anchor.
-     * 
+     *
      * @param anchorType the anchor type
      * @returns the anchor
      */
@@ -420,7 +420,7 @@ export class Client {
 
     /**
      * Verifies the given proof.
-     * 
+     *
      * @param proof the proof to verify
      * @returns true if verified, else false.
      */

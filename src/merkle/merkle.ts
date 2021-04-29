@@ -208,20 +208,20 @@ export class Tree {
             if (isRight) {
                 let l = layer[index - 1];
                 if (l.includes(":")) {
-                    l = l.split(":")[1]
+                    l = l.split(":")[1];
                 }
                 path.push({ l: l });
             } else {
                 // Check if this is an odd node on the end and skip
-                if ((index + 1) === (layer.length)) {
+                if (index + 1 === layer.length) {
                     index = (index / 2) | 0;
                     continue;
                 }
                 let r = layer[index + 1];
                 if (r.includes(":")) {
-                    r = r.split(":")[1]
+                    r = r.split(":")[1];
                 }
-                path.push({ r: r});
+                path.push({ r: r });
             }
             index = (index / 2) | 0;
         }

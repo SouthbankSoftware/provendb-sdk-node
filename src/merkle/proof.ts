@@ -3,7 +3,7 @@ import { Path } from "./merkle";
 
 /**
  * Adds a merkle path to an existing proof.
- * 
+ *
  * @param proof the proof to add the path to
  * @param hash the hash the path begins at
  * @param algorithm the algorithm used to construct the path
