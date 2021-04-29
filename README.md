@@ -1,7 +1,7 @@
 # provendb-sdk-node
 The ProvenDB SDK for Node.
 
-**NOTE**: The SDK is still in alpha stages and not recommended for production use. For any bugs, please raise an [issue](https://github.com/SouthbankSoftware/provendb-sdk-node/issues).
+**NOTE**: The SDK is in alpha and not recommended for production use. For any bugs, please raise an [issue](https://github.com/SouthbankSoftware/provendb-sdk-node/issues).
 
 ## Installation
 

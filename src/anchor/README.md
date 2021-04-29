@@ -31,17 +31,27 @@ let client = anchor.connect(anchor.withCredentials("YOUR_CREDENTIALS"));
 To submit a quick proof with defaults:
 
 ```js
-let proof = await client.submitProof("da63e4bd82fc6e5fd7337e6bd9147d8cada6652d9049020edc6deb69b18cf69c")
+let proof = await client.submitProof("da63e4bd82fc6e5fd7337e6bd9147d8cada6652d9049020edc6deb69b18cf69c");
 ```
 
-To submit a proof with options:
+To submit a proof and wait for the proof to be `CONFIRMED` before resolving the promise, add the `submitProofWithAwaitConfirmed` option:
 
 ```js
-let proof = client.submitProof("da63e4bd82fc6e5fd7337e6bd9147d8cada6652d9049020edc6deb69b18cf69c", 
-    anchor.submitProofWithAnchorType(anchor.Anchor.Type.HEDERA_MAINNET), // your chosen anchor type
-    anchor.submitProofWithSkipBatching(true), // whether to anchor immediately and skip the batching process
-    anchor.submitProofWithFormat(anchor.Proof.Format.CHP_PATH),  // the proof format
-    anchor.submitProofWithAwaitConfirmed(true)) // whether to return only when the proof status is CONFIRMED.
+let proof = await client.submitProof("da63e4bd82fc6e5d7337e6bd9147d8cada6652d9049020edc6deb69b18cf69c", 
+    anchor.submitProofWithAwaitConfirmed(true));
+```
+
+To submit a proof with different anchor types, add the `submitProofWithAnchorType` option:
+
+```js
+let hederaProof = await client.submitProof("da63e4bd82fc6e5fd7337e6bd9147d8cada6652d9049020edc6deb69b18cf69c", 
+    anchor.submitProofWithAnchorType(anchor.Anchor.Type.HEDERA_MAINNET));
+
+let ethereumProof = await client.submitProof("da63e4bd82fc6e5fd7337e6bd9147d8cada6652d9049020edc6deb69b18cf69c", 
+    anchor.submitProofWithAnchorType(anchor.Anchor.Type.ETH_MAINNET));
+
+let bitcoinProof = await client.submitProof("da63e4bd82fc6e5fd7337e6bd9147d8cada6652d9049020edc6deb69b18cf69c", 
+    anchor.submitProofWithAnchorType(anchor.Anchor.Type.BTC_MAINNET));
 ```
 
 ## Subscribing to Proof Changes
@@ -55,7 +65,7 @@ client.subscribeProof(proof, callback(err, proof) => {
     if (err) {
         // handle error
     } else {
-        // do something
+        // do something with proof
     }
 })
 ```
@@ -63,6 +73,7 @@ client.subscribeProof(proof, callback(err, proof) => {
 Alternatively, you can retrieve a proof without subscribing by periodically calling `getProof`.
 
 ```js
+// Submit the proof
 let submitted = await client.submitProof("da63e4bd82fc6e5fd7337e6bd9147d8cada6652d9049020edc6deb69b18cf69c")
 
 // Update the proof with getProof
