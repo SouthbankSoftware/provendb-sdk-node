@@ -294,7 +294,7 @@ export class Client {
         return new Promise<AnchorProof>((res, rej) => {
             // Set the default options
             let options: SubmitProofOptions = {
-                anchorType: anchor.Anchor.Type.ETH,
+                anchorType: anchor.Anchor.Type.HEDERA_MAINNET,
                 format: anchor.Proof.Format.CHP_PATH,
                 skipBatching: false,
                 awaitConfirmed: false,

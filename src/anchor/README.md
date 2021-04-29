@@ -2,19 +2,17 @@
 
 The official ProvenDB Anchor client. 
 
-This library provides a gRPC wrapped client for easy usage in projects, as well as the generated protobuf files for those that wish to use the protobuf generated code directly.
-
 Service definitions for the ProvenDB Anchor service can be found [here](https://github.com/SouthbankSoftware/provendb-apis/tree/main/anchor).
 
 ## Contents
 
-- [Usage](#usage)
+- [Importing](#importing)
 - [Creating The Client](#creating-the-client)
 - [Submitting a Proof](#submitting-a-proof)
 - [Subscribing to Proof Changes](#subscribing-to-proof-changes)
 - [Documentation](#documentation)
 
-## Usage 
+## Importing 
 
 ```js
 import { anchor } from "provendb-sdk-node";
@@ -23,7 +21,7 @@ import { anchor } from "provendb-sdk-node";
 ## Creating The Client
 
 ```js
-let client = anchor.connect(anchor.withCredentials("YOUR_CREDENTIALS"));
+let client = anchor.connect(anchor.withCredentials("YOUR_API_KEY"));
 ```
 
 ## Submitting a Proof
@@ -76,6 +74,7 @@ Alternatively, you can retrieve a proof without subscribing by periodically call
 // Submit the proof
 let submitted = await client.submitProof("da63e4bd82fc6e5fd7337e6bd9147d8cada6652d9049020edc6deb69b18cf69c")
 
+// Wait 
 // Update the proof with getProof
 let updated = await getProof(proof.hash, proof.batchId, proof.anchorType)
 ```

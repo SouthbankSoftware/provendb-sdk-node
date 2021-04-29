@@ -5,10 +5,11 @@ A library for constructing a Merkle tree.
 ## Contents
 - [Install](#install)
 - [Getting Started](#getting-started)
+    - [Before You Begin](#before-you-begin)
     - [Building a MerkleTree](#building-a-merkletree)
     - [Exploring a MerkleTree](#exploring-a-merkletree)
     - [Adding Merkle Path to Proof](#adding-merkle-path-to-proof)
-    - [MerkleFile](#merklefile)
+    - [File](#file)
         - [Export](#export)
         - [Import](#import)
 - [Documentation](#documentation)
@@ -19,11 +20,10 @@ A library for constructing a Merkle tree.
 import { merkle } from "provendb-sdk-node";
 ```
 
-### Important Information
+### Before You Begin
 
 The order of items being added to the tree is important in the reconstruction of a duplicate tree from the same data. That being said,
-you need to ensure that you are adding items to the tree in a determinite way. If you are using asyncronous operations in your application to add items to the tree,
-you need to ensure the asyncronous operations have completed before adding the next items to the tree.
+you need to ensure that you are adding items to the tree in a determinite way.
 
 ### Building a MerkleTree 
 
@@ -59,7 +59,7 @@ builder.addBatch([
 
 For larger items, you can stream in chunks of data that will be digested upon completion.
 
-**Please Note** - ensure you have read [Important Information](#important-information) for asyncronous operations.
+**Please Note** - ensure you have read [Before You Begin](##before-you-begin) for asyncronous operations.
 
 ```js
 // Create the write stream
@@ -89,7 +89,7 @@ When you construct a tree using the `Builder`, the final result is a `Tree`.
 For our example, let's take the following constructed tree:
 
 ```js
-let tree = merkle.builder("sha256").addBatch([
+let tree = merkle.newBuilder("sha-256").addBatch([
     { key: "key1", value: Buffer.from("m") },
     { key: "key2", value: Buffer.from("e") },
     { key: "key3", value: Buffer.from("r") },
@@ -106,7 +106,7 @@ let tree = merkle.builder("sha256").addBatch([
 We can retrieve the tree information as follows:
 
 ```js
-// Retrieves the algorithm used to construct the tree. Returns "sha256"
+// Retrieves the algorithm used to construct the tree. Returns "sha-256"
 tree.getAlgorithm();
 
 // Retrieves the number of levels in the tree. Returns 5.
@@ -125,21 +125,21 @@ tree.nLeaves();
 tree.getRoot();
 
 // Retrieve a single leaf. Returns
-// { key: 'key1', hash: '62c66a7a5dd70c3146618063c344e531e6d4b59e379808443ce962b3abd63c5a' }
+// { key: 'key1', value: '62c66a7a5dd70c3146618063c344e531e6d4b59e379808443ce962b3abd63c5a' }
 tree.getLeaf("key1");
 
 // Retrieves an array of all the leaves in the tree. Returns
 // [
-//   { key: 'key1', hash: '62c66a7a5dd70c3146618063c344e531e6d4b59e379808443ce962b3abd63c5a' },
-//   { key: 'key2', hash: '3f79bb7b435b05321651daefd374cdc681dc06faa65e374e38337b88ca046dea' },
-//   { key: 'key3', hash: '454349e422f05297191ead13e21d3db520e5abef52055e4964b82fb213f593a1' },
-//   { key: 'key4', hash: '8254c329a92850f6d539dd376f4816ee2764517da5e0235514af433164480d7a' },
-//   { key: 'key5', hash: 'acac86c0e609ca906f632b0e2dacccb2b77d22b0621f20ebece1a4835b93f6f0' },
-//   { key: 'key6', hash: '3f79bb7b435b05321651daefd374cdc681dc06faa65e374e38337b88ca046dea' },
-//   { key: 'key7', hash: 'e3b98a4da31a127d4bde6e43033f66ba274cab0eb7eb1c70ec41402bf6273dd8' },
-//   { key: 'key8', hash: '454349e422f05297191ead13e21d3db520e5abef52055e4964b82fb213f593a1' },
-//   { key: 'key9', hash: '3f79bb7b435b05321651daefd374cdc681dc06faa65e374e38337b88ca046dea' },
-//   { key: 'key10', hash: '3f79bb7b435b05321651daefd374cdc681dc06faa65e374e38337b88ca046dea' }
+//   { key: 'key1', value: '62c66a7a5dd70c3146618063c344e531e6d4b59e379808443ce962b3abd63c5a' },
+//   { key: 'key2', value: '3f79bb7b435b05321651daefd374cdc681dc06faa65e374e38337b88ca046dea' },
+//   { key: 'key3', value: '454349e422f05297191ead13e21d3db520e5abef52055e4964b82fb213f593a1' },
+//   { key: 'key4', value: '8254c329a92850f6d539dd376f4816ee2764517da5e0235514af433164480d7a' },
+//   { key: 'key5', value: 'acac86c0e609ca906f632b0e2dacccb2b77d22b0621f20ebece1a4835b93f6f0' },
+//   { key: 'key6', value: '3f79bb7b435b05321651daefd374cdc681dc06faa65e374e38337b88ca046dea' },
+//   { key: 'key7', value: 'e3b98a4da31a127d4bde6e43033f66ba274cab0eb7eb1c70ec41402bf6273dd8' },
+//   { key: 'key8', value: '454349e422f05297191ead13e21d3db520e5abef52055e4964b82fb213f593a1' },
+//   { key: 'key9', value: '3f79bb7b435b05321651daefd374cdc681dc06faa65e374e38337b88ca046dea' },
+//   { key: 'key10', value: '3f79bb7b435b05321651daefd374cdc681dc06faa65e374e38337b88ca046dea' }
 // ]
 tree.getLeaves();
 
@@ -150,8 +150,7 @@ tree.getLeaves();
 // ]
 tree.getLevel(1);
 
-// Retrieve the merkle path from a specific leaf. The boolean flag specifies whether the input
-// has already been hashed.
+// Retrieve the merkle path from a specific leaf.
 // Returns an array of left and right values all the way to the root:
 // [
 //   {
@@ -167,7 +166,7 @@ tree.getLevel(1);
 //     r: '75de222d8adebd767f99a5fe35a5f3f58dbfa3d51ec28b54e9da4225ec8f170d'
 //   }
 // ]
-tree.getPath("62c66a7a5dd70c3146618063c344e531e6d4b59e379808443ce962b3abd63c5a", true);
+tree.getPath("key1");
 ```
 
 ### Adding Merkle Path to Proof
@@ -176,7 +175,7 @@ If you have submitted a proof for this tree via the [anchor](../anchor) client, 
 `addPathToProof()`. 
 
 ```js
-let proof = tree.addPathToProof(YOUR_ANCHOR_PROOF, tree,getLeaf("key1"), "my_custom_label");
+let proof = tree.addPathToProof(YOUR_ANCHOR_PROOF, "key1", "my_custom_label");
 ```
 
 A proof with the path should look like the following:
@@ -254,10 +253,7 @@ A `File` is a representation of a merkle tree that this library understands. A `
 
 ### Representation of data
 
-To avoid deep nesting, a two-dimensional array is used to represent the data in the merkle tree. All data is represented as a hash using the algorithm defined in the file.
-
-The index `data[0]` contains an array of the leaves, represented from left (`data[0][0]`) to right (`data[0][data[0].length - 1]`), while position `data[data.length - 1]` contains an array with a single element
-representing the root hash.
+To avoid deep nesting, a two-dimensional array is used to represent the data in the merkle tree. All data is represented as a hash using the algorithm defined in the file (except for leaves which contain a colon separated key/value).
 
 ### Export
 
@@ -279,4 +275,4 @@ let imported = merkle.importSync("./merkle_tree.json");
 
 ## Documentation
 
-TODO
+Full API documentation not yet available.

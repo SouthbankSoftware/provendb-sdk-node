@@ -1,4 +1,5 @@
 # provendb-sdk-node
+
 The ProvenDB SDK for Node.
 
 **NOTE**: The SDK is in alpha and not recommended for production use. For any bugs, please raise an [issue](https://github.com/SouthbankSoftware/provendb-sdk-node/issues).
@@ -19,25 +20,20 @@ The ProvenDB SDK for Node.
 ## Hello World!
 
 This Hello, World example uses both the [anchor](./src/anchor) and [merkle](./src/merkle) libraries to generate
-a merkle tree and submit the tree's root hash to the blockchain via the ProvenDB Anchor service.
-
-First, we need to construct our merkle tree:
+a merkle tree and submit the tree's root hash to Hedera via the ProvenDB Anchor service.
 
 ```js
 import { anchor, merkle } from "provendb-sdk-node";
 
-// Create the new builder
+// Create the new builder and add your data.
 let builder = merkle.newBuilder("sha-256");
-
-// Add your key/values.
 builder.add("key1", Buffer.from("Hello, "));
 builder.add("key2", Buffer.from("World, !"));
 
-// Construct the tree
+// Construct the tree.
 let tree = builder.build();
 
-// Once you have your tree object, you are now ready to anchor it! To anchor it, we use the root hash
-// of the merkle tree and submit it to the ProvenDB Anchor service. Create your new anchor client.
+// Create a new anchor client using your credentials (contact us to get credentials)
 let client = anchor.connect(anchor.withCredentials("YOUR_API_KEY"));
 
 // Submit your proof.
@@ -52,4 +48,8 @@ tree.addProof(proof);
 tree.exportSync("./merkle.json");
 ```
 
-Congratulations, you have successfully created and anchored your first `Hello, World!` proof!
+Congratulations, you have successfully created, anchored and exported your first `Hello, World!` proof!
+
+## Documentation
+
+Full API documentation not yet available.
