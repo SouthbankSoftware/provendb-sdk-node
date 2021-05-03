@@ -1,6 +1,6 @@
 {
   "name": "provendb-sdk-node",
-  "version": "0.1.0-alpha.0",
+  "version": "0.1.0-alpha.1",
   "description": "The ProvenDB SDK for Node.",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
