@@ -1,4 +1,4 @@
-import { Builder, newBuilder, Path } from "../src/merkle/merkle";
+import { Builder, newBuilder, importTree, Path, File } from "../src/merkle/merkle";
 // The leaves (a, b, c, ... p) are hashed using a utf8 encoded string, and all hashes following are hashed
 // using hex encoded strings. There should be enough data here to create your test cases.
 const a = "ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb";
@@ -60,6 +60,14 @@ const abcdefghijklmnop_messageHashed =
     "d5d55c1dba8af00399a878abc75c21d328caa1815cb7fbaa5ad106e6eb9c0fea";
 
 describe("Test Tree", () => {
+    it("should import", () => {
+        let file: any = {}
+        Object.assign(file, JSON.parse('{"algorithm":"sha-256","layers":[["AAAR44AAMAAAAgzAAA:305f70ab88c19c5ba8d20851ac58ad50fb8812f8e3d839826e59e9a7c9c429e9","AAAR44AAMAAAAgzAAB:cf458618fa15ac9a72fcd296f5e102f15eff63fe40d256f20f756097475f9ac7"],["7490851498225877e49242413ae9a8f532896b29c25a914d8e26d53589a22c83"]],"proofs":[{"id":"7490851498225877e49242413ae9a8f532896b29c25a914d8e26d53589a22c83:XEKrNVaTCQs4TAWtaZ5mA","anchorType":"HEDERA","format":"CHP_PATH","batchId":"XEKrNVaTCQs4TAWtaZ5mA","hash":"7490851498225877e49242413ae9a8f532896b29c25a914d8e26d53589a22c83","status":"CONFIRMED","metadata":{"txnId":"91ae3a5b71fc9dcc7db2b94791d366546059503b61b331b953ffbb401e194bd1d0e5f5c1842a83382a2936798b106f69","txnUri":"https://explorer.kabuto.sh/testnet/transaction/91ae3a5b71fc9dcc7db2b94791d366546059503b61b331b953ffbb401e194bd1d0e5f5c1842a83382a2936798b106f69","blockTime":1621900778,"blockTimeNano":804949000,"validStart":"2021-05-24T23:59:26.166767126Z","operator":"0.0.32921","transactionFee":39738,"confirmedByMirror":true},"data":{"@context":"https://w3id.org/chainpoint/v3","type":"Chainpoint","hash":"7490851498225877e49242413ae9a8f532896b29c25a914d8e26d53589a22c83","hash_id_node":"da023c5c-c895-11e9-a32f-2a2ae2dbcce4","hash_submitted_node_at":"2021-05-24T23:59:38Z","hash_id_core":"da023c5c-c895-11e9-a32f-2a2ae2dbcce4","hash_submitted_core_at":"2021-05-24T23:59:38Z","branches":[{"label":"pdb_hedera_anchor_branch","ops":[{"anchors":[{"type":"cal","anchor_id":"91ae3a5b71fc9dcc7db2b94791d366546059503b61b331b953ffbb401e194bd1d0e5f5c1842a83382a2936798b106f69","uris":["https://anchor.dev.proofable.io/verify/hedera/91ae3a5b71fc9dcc7db2b94791d366546059503b61b331b953ffbb401e194bd1d0e5f5c1842a83382a2936798b106f69"]}]}]}]}}],"nodes":1}'))
+
+        console.log(file);
+        importTree(file as File)
+    });
+
     it("Should build correct tree (even leaves)", () => {
         let builder = newBuilder("sha-256");
         builder.add("a", Buffer.from("a"));
