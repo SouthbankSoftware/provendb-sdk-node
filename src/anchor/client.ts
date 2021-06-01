@@ -5,6 +5,7 @@ import {
     status,
     Metadata,
     ChannelCredentials,
+    CallCredentials,
     ClientReadableStream,
     ServiceError,
 } from "@grpc/grpc-js";
@@ -66,8 +67,24 @@ export function connect(...opts: ClientOption[]): Client {
     let chanCred: ChannelCredentials = options.insecure
         ? credentials.createInsecure()
         : credentials.createSsl();
+
+    // call credentials
+    const metaCallback = (
+        params: any,
+        callback: (err: Error | null, metadata?: Metadata) => void
+    ) => {
+        const meta = new Metadata();
+        meta.add("authorization", options.credentials);
+        callback(null, meta);
+    };
+    let callCreds: CallCredentials = credentials.createFromMetadataGenerator(
+        metaCallback
+    );
     return new Client(
-        new service.AnchorServiceClient(options.address, chanCred)
+        new service.AnchorServiceClient(
+            options.address,
+            credentials.combineChannelCredentials(chanCred, callCreds)
+        )
     );
 }
 

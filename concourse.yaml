@@ -1,0 +1,32 @@
+# resource_types:
+  # - name: slack-alert
+  #   type: docker-image
+  #   source:
+  #     repository: southbanksoftware/concourse-slack-alert-resource
+  # - name: pull-request
+  #   type: docker-image
+  #   source:
+  #     repository: teliaoss/github-pr-resource
+
+resources:
+  - name: provendb-sdk-node
+    type: git
+    check_every: 5m
+    webhook_token: ((common.webhook-token))
+    source:
+      uri: https://github.com/SouthbankSoftware/provendb-sdk-node.git
+      branch: main
+      username: ((common.git-username))
+      password: ((common.git-password))
+      disable_ci_skip: false
+
+jobs:
+  - name: build-test-release
+    serial: true
+    plan:
+      - get: provendb-sdk-node
+        trigger: true
+  - name: release
+    plan:
+      - get: provendb-sdk-node
+        trigger: true

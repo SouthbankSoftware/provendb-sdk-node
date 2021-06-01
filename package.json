@@ -1,12 +1,13 @@
 {
   "name": "provendb-sdk-node",
-  "version": "0.1.0-alpha.0",
+  "version": "0.1.0-alpha.1",
   "description": "The ProvenDB SDK for Node.",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
     "clean": "rm -rf lib",
-    "build": "npm run clean && tsc",
+    "build": "npm run clean && tsc && npm run build-anchor",
+    "build-anchor": "find src/anchor -type f -name 'anchor_*' -exec cp '{}' lib/anchor/ ';'",
     "format": "prettier --config .prettierrc 'src/**/*.ts' --write",
     "test": "jest",
     "docs-clean": "rm -rf docs",

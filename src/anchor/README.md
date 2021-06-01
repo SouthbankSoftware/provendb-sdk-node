@@ -59,7 +59,7 @@ When a proof is submitted, it is yet to be confirmed (unless your specify `submi
 ```js
 let proof = await client.submitProof("da63e4bd82fc6e5fd7337e6bd9147d8cada6652d9049020edc6deb69b18cf69c")
 
-client.subscribeProof(proof, callback(err, proof) => {
+client.subscribeProof(proof.id, proof.anchorType, callback(err, proof) => {
     if (err) {
         // handle error
     } else {
@@ -76,7 +76,7 @@ let submitted = await client.submitProof("da63e4bd82fc6e5fd7337e6bd9147d8cada665
 
 // Wait 
 // Update the proof with getProof
-let updated = await getProof(proof.hash, proof.batchId, proof.anchorType)
+let updated = await getProof(proof.id, proof.anchorType)
 ```
 
 ## Documentation
