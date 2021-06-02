@@ -63,6 +63,7 @@
 				</a>
 				<p>The ProvenDB SDK for Node.</p>
 				<p><strong>NOTE</strong>: The SDK is in alpha and not recommended for production use. For any bugs, please raise an <a href="https://github.com/SouthbankSoftware/provendb-sdk-node/issues">issue</a>.</p>
+				<p>The use of our services requires an API key. Visit <a href="https://provendb.com">provendb.com</a> to sign in/register and create one.</p>
 				<a href="#installation" id="installation" style="color: inherit; text-decoration: none;">
 					<h2>Installation</h2>
 				</a>
@@ -107,7 +108,7 @@
 <span style="color: #008000">// Construct the tree.</span>
 <span style="color: #0000FF">let</span><span style="color: #000000"> </span><span style="color: #001080">tree</span><span style="color: #000000"> = </span><span style="color: #001080">builder</span><span style="color: #000000">.</span><span style="color: #795E26">build</span><span style="color: #000000">();</span>
 
-<span style="color: #008000">// Create a new anchor client using your credentials (contact us to get credentials)</span>
+<span style="color: #008000">// Create a new anchor client using your credentials</span>
 <span style="color: #0000FF">let</span><span style="color: #000000"> </span><span style="color: #001080">client</span><span style="color: #000000"> = </span><span style="color: #001080">anchor</span><span style="color: #000000">.</span><span style="color: #795E26">connect</span><span style="color: #000000">(</span><span style="color: #001080">anchor</span><span style="color: #000000">.</span><span style="color: #795E26">withCredentials</span><span style="color: #000000">(</span><span style="color: #A31515">&quot;YOUR_API_KEY&quot;</span><span style="color: #000000">));</span>
 
 <span style="color: #008000">// Submit your proof.</span>
