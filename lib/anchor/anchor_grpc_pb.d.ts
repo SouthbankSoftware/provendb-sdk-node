@@ -290,7 +290,8 @@ export interface IAnchorServiceClient {
 
 export class AnchorServiceClient
     extends grpc.Client
-    implements IAnchorServiceClient {
+    implements IAnchorServiceClient
+{
     constructor(
         address: string,
         credentials: grpc.ChannelCredentials,

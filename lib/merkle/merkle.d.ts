@@ -77,6 +77,11 @@ export declare class Tree {
      * Retreives the algorithm used to construct the tree.
      */
     getAlgorithm(): string;
+    /**
+     * Retrieves a single leaf or null if it does not exist.
+     * @param key the key of the leaf
+     * @returns the leaf
+     */
     getLeaf(key: string): Leaf | null;
     /**
      * Retrieves the leaves data.

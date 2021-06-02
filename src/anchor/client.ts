@@ -77,9 +77,8 @@ export function connect(...opts: ClientOption[]): Client {
         meta.add("authorization", options.credentials);
         callback(null, meta);
     };
-    let callCreds: CallCredentials = credentials.createFromMetadataGenerator(
-        metaCallback
-    );
+    let callCreds: CallCredentials =
+        credentials.createFromMetadataGenerator(metaCallback);
     return new Client(
         new service.AnchorServiceClient(
             options.address,
@@ -378,9 +377,8 @@ export class Client {
                     .setAnchorType(options.filter.anchorType)
             );
         }
-        let res: ClientReadableStream<anchor.Batch> = this.client.subscribeBatches(
-            req
-        );
+        let res: ClientReadableStream<anchor.Batch> =
+            this.client.subscribeBatches(req);
         res.on("data", (data: anchor.Batch.AsObject) => {
             callback(null, data);
         });

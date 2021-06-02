@@ -57,6 +57,25 @@ export function importTreeSync(path: string): Tree {
 }
 
 /**
+ * Converts string data to leaf.
+ * @param data the data
+ * @returns the leaf
+ */
+function toLeaf(data: string): Leaf {
+    let s: string[] = data.split(":");
+    return { key: s[0], value: s[1] };
+}
+
+/**
+ * Converts leaf to string data.
+ * @param leaf the leaf
+ * @returns the string data
+ */
+function fromLeaf(leaf: Leaf): string {
+    return leaf.key + ":" + leaf.value;
+}
+
+/**
  * Constructs a new builder.
  * @param algorithm the algorithm to use for hashing.
  */
@@ -138,12 +157,17 @@ export class Tree {
         return this.algorithm;
     }
 
+    /**
+     * Retrieves a single leaf or null if it does not exist.
+     * @param key the key of the leaf
+     * @returns the leaf
+     */
     getLeaf(key: string): Leaf | null {
         let leaf = null;
         this.layers[0].forEach((v) => {
-            let s: string[] = v.split(":");
-            if (s[0] === key) {
-                leaf = { key: s[0], value: s[1] };
+            let l: Leaf = toLeaf(v);
+            if (l.key === key) {
+                leaf = l;
                 return;
             }
         });
@@ -156,8 +180,7 @@ export class Tree {
     getLeaves(): Leaf[] {
         let leaves: Leaf[] = [];
         this.layers[0].forEach((v) => {
-            let s: string[] = v.split(":");
-            leaves.push({ key: s[0], value: s[1] });
+            leaves.push(toLeaf(v));
         });
         return leaves;
     }
@@ -183,6 +206,10 @@ export class Tree {
      * @param leaf the leaf
      */
     getPath(key: string): Path[] {
+        // If only a single node, return empty path.
+        if (this.nodes === 0) {
+            return [];
+        }
         let leaf = this.getLeaf(key);
         if (leaf === null) {
             return [];
@@ -192,7 +219,7 @@ export class Tree {
         // Find the leaf first
         let index = -1;
         for (let i = 0; i < this.layers[0].length; i++) {
-            if (this.layers[0][i].split(":")[1] === hash) {
+            if (toLeaf(this.layers[0][i]).value === hash) {
                 index = i;
             }
         }
@@ -239,6 +266,10 @@ export class Tree {
      * Retrieves the root hash of this tree.
      */
     getRoot(): string {
+        // If a single node, return the value of the leaf/root.
+        if (this.nodes === 0) {
+            return toLeaf(this.layers[0][0]).value;
+        }
         return this.layers[this.layers.length - 1][0];
     }
 
@@ -274,6 +305,10 @@ export class Tree {
      * Verifies this tree by recalculating the root from all the layers.
      */
     verify(): boolean {
+        // If a single node/leaf/root, always return true. Nothing to calculate.
+        if (this.nodes === 0) {
+            return true;
+        }
         let current: string[] = [];
         let leaves = this.getLeaves();
         leaves.forEach((l) => current.push(l.value));
@@ -380,8 +415,14 @@ export class Builder {
      * Builds the merkle tree.
      */
     build(): Tree {
-        // Construct from the leaves
-        this._build(this.layers[0]);
+        // Perform some validation
+        if (this.layers[0].length === 0) {
+            throw new Error("a tree must contain at least 1 leaf");
+        }
+        // Build the tree only if there is more than one leaf.
+        if (this.layers[0].length > 1) {
+            this._build(this.layers[0]);
+        }
         return new Tree(this.algorithm, this.layers);
     }
 
