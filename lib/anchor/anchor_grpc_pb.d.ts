@@ -5,13 +5,12 @@
 /* eslint-disable */
 
 import * as grpc from "@grpc/grpc-js";
-import { handleClientStreamingCall } from "@grpc/grpc-js/build/src/server-call";
+import {handleClientStreamingCall} from "@grpc/grpc-js/build/src/server-call";
 import * as anchor_anchor_pb from "../anchor/anchor_pb";
 import * as google_protobuf_empty_pb from "google-protobuf/google/protobuf/empty_pb";
 import * as google_protobuf_timestamp_pb from "google-protobuf/google/protobuf/timestamp_pb";
 
-interface IAnchorServiceService
-    extends grpc.ServiceDefinition<grpc.UntypedServiceImplementation> {
+interface IAnchorServiceService extends grpc.ServiceDefinition<grpc.UntypedServiceImplementation> {
     getAnchors: IAnchorServiceService_IGetAnchors;
     getAnchor: IAnchorServiceService_IGetAnchor;
     getProof: IAnchorServiceService_IGetProof;
@@ -21,11 +20,7 @@ interface IAnchorServiceService
     subscribeBatches: IAnchorServiceService_ISubscribeBatches;
 }
 
-interface IAnchorServiceService_IGetAnchors
-    extends grpc.MethodDefinition<
-        google_protobuf_empty_pb.Empty,
-        anchor_anchor_pb.Anchor
-    > {
+interface IAnchorServiceService_IGetAnchors extends grpc.MethodDefinition<google_protobuf_empty_pb.Empty, anchor_anchor_pb.Anchor> {
     path: "/anchor.AnchorService/GetAnchors";
     requestStream: false;
     responseStream: true;
@@ -34,11 +29,7 @@ interface IAnchorServiceService_IGetAnchors
     responseSerialize: grpc.serialize<anchor_anchor_pb.Anchor>;
     responseDeserialize: grpc.deserialize<anchor_anchor_pb.Anchor>;
 }
-interface IAnchorServiceService_IGetAnchor
-    extends grpc.MethodDefinition<
-        anchor_anchor_pb.AnchorRequest,
-        anchor_anchor_pb.Anchor
-    > {
+interface IAnchorServiceService_IGetAnchor extends grpc.MethodDefinition<anchor_anchor_pb.AnchorRequest, anchor_anchor_pb.Anchor> {
     path: "/anchor.AnchorService/GetAnchor";
     requestStream: false;
     responseStream: false;
@@ -47,11 +38,7 @@ interface IAnchorServiceService_IGetAnchor
     responseSerialize: grpc.serialize<anchor_anchor_pb.Anchor>;
     responseDeserialize: grpc.deserialize<anchor_anchor_pb.Anchor>;
 }
-interface IAnchorServiceService_IGetProof
-    extends grpc.MethodDefinition<
-        anchor_anchor_pb.ProofRequest,
-        anchor_anchor_pb.Proof
-    > {
+interface IAnchorServiceService_IGetProof extends grpc.MethodDefinition<anchor_anchor_pb.ProofRequest, anchor_anchor_pb.Proof> {
     path: "/anchor.AnchorService/GetProof";
     requestStream: false;
     responseStream: false;
@@ -60,11 +47,7 @@ interface IAnchorServiceService_IGetProof
     responseSerialize: grpc.serialize<anchor_anchor_pb.Proof>;
     responseDeserialize: grpc.deserialize<anchor_anchor_pb.Proof>;
 }
-interface IAnchorServiceService_ISubmitProof
-    extends grpc.MethodDefinition<
-        anchor_anchor_pb.SubmitProofRequest,
-        anchor_anchor_pb.Proof
-    > {
+interface IAnchorServiceService_ISubmitProof extends grpc.MethodDefinition<anchor_anchor_pb.SubmitProofRequest, anchor_anchor_pb.Proof> {
     path: "/anchor.AnchorService/SubmitProof";
     requestStream: false;
     responseStream: false;
@@ -73,11 +56,7 @@ interface IAnchorServiceService_ISubmitProof
     responseSerialize: grpc.serialize<anchor_anchor_pb.Proof>;
     responseDeserialize: grpc.deserialize<anchor_anchor_pb.Proof>;
 }
-interface IAnchorServiceService_IVerifyProof
-    extends grpc.MethodDefinition<
-        anchor_anchor_pb.VerifyProofRequest,
-        anchor_anchor_pb.VerifyProofReply
-    > {
+interface IAnchorServiceService_IVerifyProof extends grpc.MethodDefinition<anchor_anchor_pb.VerifyProofRequest, anchor_anchor_pb.VerifyProofReply> {
     path: "/anchor.AnchorService/VerifyProof";
     requestStream: false;
     responseStream: false;
@@ -86,11 +65,7 @@ interface IAnchorServiceService_IVerifyProof
     responseSerialize: grpc.serialize<anchor_anchor_pb.VerifyProofReply>;
     responseDeserialize: grpc.deserialize<anchor_anchor_pb.VerifyProofReply>;
 }
-interface IAnchorServiceService_IGetBatch
-    extends grpc.MethodDefinition<
-        anchor_anchor_pb.BatchRequest,
-        anchor_anchor_pb.Batch
-    > {
+interface IAnchorServiceService_IGetBatch extends grpc.MethodDefinition<anchor_anchor_pb.BatchRequest, anchor_anchor_pb.Batch> {
     path: "/anchor.AnchorService/GetBatch";
     requestStream: false;
     responseStream: false;
@@ -99,11 +74,7 @@ interface IAnchorServiceService_IGetBatch
     responseSerialize: grpc.serialize<anchor_anchor_pb.Batch>;
     responseDeserialize: grpc.deserialize<anchor_anchor_pb.Batch>;
 }
-interface IAnchorServiceService_ISubscribeBatches
-    extends grpc.MethodDefinition<
-        anchor_anchor_pb.SubscribeBatchesRequest,
-        anchor_anchor_pb.Batch
-    > {
+interface IAnchorServiceService_ISubscribeBatches extends grpc.MethodDefinition<anchor_anchor_pb.SubscribeBatchesRequest, anchor_anchor_pb.Batch> {
     path: "/anchor.AnchorService/SubscribeBatches";
     requestStream: false;
     responseStream: true;
@@ -115,323 +86,57 @@ interface IAnchorServiceService_ISubscribeBatches
 
 export const AnchorServiceService: IAnchorServiceService;
 
-export interface IAnchorServiceServer
-    extends grpc.UntypedServiceImplementation {
-    getAnchors: grpc.handleServerStreamingCall<
-        google_protobuf_empty_pb.Empty,
-        anchor_anchor_pb.Anchor
-    >;
-    getAnchor: grpc.handleUnaryCall<
-        anchor_anchor_pb.AnchorRequest,
-        anchor_anchor_pb.Anchor
-    >;
-    getProof: grpc.handleUnaryCall<
-        anchor_anchor_pb.ProofRequest,
-        anchor_anchor_pb.Proof
-    >;
-    submitProof: grpc.handleUnaryCall<
-        anchor_anchor_pb.SubmitProofRequest,
-        anchor_anchor_pb.Proof
-    >;
-    verifyProof: grpc.handleUnaryCall<
-        anchor_anchor_pb.VerifyProofRequest,
-        anchor_anchor_pb.VerifyProofReply
-    >;
-    getBatch: grpc.handleUnaryCall<
-        anchor_anchor_pb.BatchRequest,
-        anchor_anchor_pb.Batch
-    >;
-    subscribeBatches: grpc.handleServerStreamingCall<
-        anchor_anchor_pb.SubscribeBatchesRequest,
-        anchor_anchor_pb.Batch
-    >;
+export interface IAnchorServiceServer extends grpc.UntypedServiceImplementation {
+    getAnchors: grpc.handleServerStreamingCall<google_protobuf_empty_pb.Empty, anchor_anchor_pb.Anchor>;
+    getAnchor: grpc.handleUnaryCall<anchor_anchor_pb.AnchorRequest, anchor_anchor_pb.Anchor>;
+    getProof: grpc.handleUnaryCall<anchor_anchor_pb.ProofRequest, anchor_anchor_pb.Proof>;
+    submitProof: grpc.handleUnaryCall<anchor_anchor_pb.SubmitProofRequest, anchor_anchor_pb.Proof>;
+    verifyProof: grpc.handleUnaryCall<anchor_anchor_pb.VerifyProofRequest, anchor_anchor_pb.VerifyProofReply>;
+    getBatch: grpc.handleUnaryCall<anchor_anchor_pb.BatchRequest, anchor_anchor_pb.Batch>;
+    subscribeBatches: grpc.handleServerStreamingCall<anchor_anchor_pb.SubscribeBatchesRequest, anchor_anchor_pb.Batch>;
 }
 
 export interface IAnchorServiceClient {
-    getAnchors(
-        request: google_protobuf_empty_pb.Empty,
-        options?: Partial<grpc.CallOptions>
-    ): grpc.ClientReadableStream<anchor_anchor_pb.Anchor>;
-    getAnchors(
-        request: google_protobuf_empty_pb.Empty,
-        metadata?: grpc.Metadata,
-        options?: Partial<grpc.CallOptions>
-    ): grpc.ClientReadableStream<anchor_anchor_pb.Anchor>;
-    getAnchor(
-        request: anchor_anchor_pb.AnchorRequest,
-        callback: (
-            error: grpc.ServiceError | null,
-            response: anchor_anchor_pb.Anchor
-        ) => void
-    ): grpc.ClientUnaryCall;
-    getAnchor(
-        request: anchor_anchor_pb.AnchorRequest,
-        metadata: grpc.Metadata,
-        callback: (
-            error: grpc.ServiceError | null,
-            response: anchor_anchor_pb.Anchor
-        ) => void
-    ): grpc.ClientUnaryCall;
-    getAnchor(
-        request: anchor_anchor_pb.AnchorRequest,
-        metadata: grpc.Metadata,
-        options: Partial<grpc.CallOptions>,
-        callback: (
-            error: grpc.ServiceError | null,
-            response: anchor_anchor_pb.Anchor
-        ) => void
-    ): grpc.ClientUnaryCall;
-    getProof(
-        request: anchor_anchor_pb.ProofRequest,
-        callback: (
-            error: grpc.ServiceError | null,
-            response: anchor_anchor_pb.Proof
-        ) => void
-    ): grpc.ClientUnaryCall;
-    getProof(
-        request: anchor_anchor_pb.ProofRequest,
-        metadata: grpc.Metadata,
-        callback: (
-            error: grpc.ServiceError | null,
-            response: anchor_anchor_pb.Proof
-        ) => void
-    ): grpc.ClientUnaryCall;
-    getProof(
-        request: anchor_anchor_pb.ProofRequest,
-        metadata: grpc.Metadata,
-        options: Partial<grpc.CallOptions>,
-        callback: (
-            error: grpc.ServiceError | null,
-            response: anchor_anchor_pb.Proof
-        ) => void
-    ): grpc.ClientUnaryCall;
-    submitProof(
-        request: anchor_anchor_pb.SubmitProofRequest,
-        callback: (
-            error: grpc.ServiceError | null,
-            response: anchor_anchor_pb.Proof
-        ) => void
-    ): grpc.ClientUnaryCall;
-    submitProof(
-        request: anchor_anchor_pb.SubmitProofRequest,
-        metadata: grpc.Metadata,
-        callback: (
-            error: grpc.ServiceError | null,
-            response: anchor_anchor_pb.Proof
-        ) => void
-    ): grpc.ClientUnaryCall;
-    submitProof(
-        request: anchor_anchor_pb.SubmitProofRequest,
-        metadata: grpc.Metadata,
-        options: Partial<grpc.CallOptions>,
-        callback: (
-            error: grpc.ServiceError | null,
-            response: anchor_anchor_pb.Proof
-        ) => void
-    ): grpc.ClientUnaryCall;
-    verifyProof(
-        request: anchor_anchor_pb.VerifyProofRequest,
-        callback: (
-            error: grpc.ServiceError | null,
-            response: anchor_anchor_pb.VerifyProofReply
-        ) => void
-    ): grpc.ClientUnaryCall;
-    verifyProof(
-        request: anchor_anchor_pb.VerifyProofRequest,
-        metadata: grpc.Metadata,
-        callback: (
-            error: grpc.ServiceError | null,
-            response: anchor_anchor_pb.VerifyProofReply
-        ) => void
-    ): grpc.ClientUnaryCall;
-    verifyProof(
-        request: anchor_anchor_pb.VerifyProofRequest,
-        metadata: grpc.Metadata,
-        options: Partial<grpc.CallOptions>,
-        callback: (
-            error: grpc.ServiceError | null,
-            response: anchor_anchor_pb.VerifyProofReply
-        ) => void
-    ): grpc.ClientUnaryCall;
-    getBatch(
-        request: anchor_anchor_pb.BatchRequest,
-        callback: (
-            error: grpc.ServiceError | null,
-            response: anchor_anchor_pb.Batch
-        ) => void
-    ): grpc.ClientUnaryCall;
-    getBatch(
-        request: anchor_anchor_pb.BatchRequest,
-        metadata: grpc.Metadata,
-        callback: (
-            error: grpc.ServiceError | null,
-            response: anchor_anchor_pb.Batch
-        ) => void
-    ): grpc.ClientUnaryCall;
-    getBatch(
-        request: anchor_anchor_pb.BatchRequest,
-        metadata: grpc.Metadata,
-        options: Partial<grpc.CallOptions>,
-        callback: (
-            error: grpc.ServiceError | null,
-            response: anchor_anchor_pb.Batch
-        ) => void
-    ): grpc.ClientUnaryCall;
-    subscribeBatches(
-        request: anchor_anchor_pb.SubscribeBatchesRequest,
-        options?: Partial<grpc.CallOptions>
-    ): grpc.ClientReadableStream<anchor_anchor_pb.Batch>;
-    subscribeBatches(
-        request: anchor_anchor_pb.SubscribeBatchesRequest,
-        metadata?: grpc.Metadata,
-        options?: Partial<grpc.CallOptions>
-    ): grpc.ClientReadableStream<anchor_anchor_pb.Batch>;
+    getAnchors(request: google_protobuf_empty_pb.Empty, options?: Partial<grpc.CallOptions>): grpc.ClientReadableStream<anchor_anchor_pb.Anchor>;
+    getAnchors(request: google_protobuf_empty_pb.Empty, metadata?: grpc.Metadata, options?: Partial<grpc.CallOptions>): grpc.ClientReadableStream<anchor_anchor_pb.Anchor>;
+    getAnchor(request: anchor_anchor_pb.AnchorRequest, callback: (error: grpc.ServiceError | null, response: anchor_anchor_pb.Anchor) => void): grpc.ClientUnaryCall;
+    getAnchor(request: anchor_anchor_pb.AnchorRequest, metadata: grpc.Metadata, callback: (error: grpc.ServiceError | null, response: anchor_anchor_pb.Anchor) => void): grpc.ClientUnaryCall;
+    getAnchor(request: anchor_anchor_pb.AnchorRequest, metadata: grpc.Metadata, options: Partial<grpc.CallOptions>, callback: (error: grpc.ServiceError | null, response: anchor_anchor_pb.Anchor) => void): grpc.ClientUnaryCall;
+    getProof(request: anchor_anchor_pb.ProofRequest, callback: (error: grpc.ServiceError | null, response: anchor_anchor_pb.Proof) => void): grpc.ClientUnaryCall;
+    getProof(request: anchor_anchor_pb.ProofRequest, metadata: grpc.Metadata, callback: (error: grpc.ServiceError | null, response: anchor_anchor_pb.Proof) => void): grpc.ClientUnaryCall;
+    getProof(request: anchor_anchor_pb.ProofRequest, metadata: grpc.Metadata, options: Partial<grpc.CallOptions>, callback: (error: grpc.ServiceError | null, response: anchor_anchor_pb.Proof) => void): grpc.ClientUnaryCall;
+    submitProof(request: anchor_anchor_pb.SubmitProofRequest, callback: (error: grpc.ServiceError | null, response: anchor_anchor_pb.Proof) => void): grpc.ClientUnaryCall;
+    submitProof(request: anchor_anchor_pb.SubmitProofRequest, metadata: grpc.Metadata, callback: (error: grpc.ServiceError | null, response: anchor_anchor_pb.Proof) => void): grpc.ClientUnaryCall;
+    submitProof(request: anchor_anchor_pb.SubmitProofRequest, metadata: grpc.Metadata, options: Partial<grpc.CallOptions>, callback: (error: grpc.ServiceError | null, response: anchor_anchor_pb.Proof) => void): grpc.ClientUnaryCall;
+    verifyProof(request: anchor_anchor_pb.VerifyProofRequest, callback: (error: grpc.ServiceError | null, response: anchor_anchor_pb.VerifyProofReply) => void): grpc.ClientUnaryCall;
+    verifyProof(request: anchor_anchor_pb.VerifyProofRequest, metadata: grpc.Metadata, callback: (error: grpc.ServiceError | null, response: anchor_anchor_pb.VerifyProofReply) => void): grpc.ClientUnaryCall;
+    verifyProof(request: anchor_anchor_pb.VerifyProofRequest, metadata: grpc.Metadata, options: Partial<grpc.CallOptions>, callback: (error: grpc.ServiceError | null, response: anchor_anchor_pb.VerifyProofReply) => void): grpc.ClientUnaryCall;
+    getBatch(request: anchor_anchor_pb.BatchRequest, callback: (error: grpc.ServiceError | null, response: anchor_anchor_pb.Batch) => void): grpc.ClientUnaryCall;
+    getBatch(request: anchor_anchor_pb.BatchRequest, metadata: grpc.Metadata, callback: (error: grpc.ServiceError | null, response: anchor_anchor_pb.Batch) => void): grpc.ClientUnaryCall;
+    getBatch(request: anchor_anchor_pb.BatchRequest, metadata: grpc.Metadata, options: Partial<grpc.CallOptions>, callback: (error: grpc.ServiceError | null, response: anchor_anchor_pb.Batch) => void): grpc.ClientUnaryCall;
+    subscribeBatches(request: anchor_anchor_pb.SubscribeBatchesRequest, options?: Partial<grpc.CallOptions>): grpc.ClientReadableStream<anchor_anchor_pb.Batch>;
+    subscribeBatches(request: anchor_anchor_pb.SubscribeBatchesRequest, metadata?: grpc.Metadata, options?: Partial<grpc.CallOptions>): grpc.ClientReadableStream<anchor_anchor_pb.Batch>;
 }
 
-export class AnchorServiceClient
-    extends grpc.Client
-    implements IAnchorServiceClient {
-    constructor(
-        address: string,
-        credentials: grpc.ChannelCredentials,
-        options?: Partial<grpc.ClientOptions>
-    );
-    public getAnchors(
-        request: google_protobuf_empty_pb.Empty,
-        options?: Partial<grpc.CallOptions>
-    ): grpc.ClientReadableStream<anchor_anchor_pb.Anchor>;
-    public getAnchors(
-        request: google_protobuf_empty_pb.Empty,
-        metadata?: grpc.Metadata,
-        options?: Partial<grpc.CallOptions>
-    ): grpc.ClientReadableStream<anchor_anchor_pb.Anchor>;
-    public getAnchor(
-        request: anchor_anchor_pb.AnchorRequest,
-        callback: (
-            error: grpc.ServiceError | null,
-            response: anchor_anchor_pb.Anchor
-        ) => void
-    ): grpc.ClientUnaryCall;
-    public getAnchor(
-        request: anchor_anchor_pb.AnchorRequest,
-        metadata: grpc.Metadata,
-        callback: (
-            error: grpc.ServiceError | null,
-            response: anchor_anchor_pb.Anchor
-        ) => void
-    ): grpc.ClientUnaryCall;
-    public getAnchor(
-        request: anchor_anchor_pb.AnchorRequest,
-        metadata: grpc.Metadata,
-        options: Partial<grpc.CallOptions>,
-        callback: (
-            error: grpc.ServiceError | null,
-            response: anchor_anchor_pb.Anchor
-        ) => void
-    ): grpc.ClientUnaryCall;
-    public getProof(
-        request: anchor_anchor_pb.ProofRequest,
-        callback: (
-            error: grpc.ServiceError | null,
-            response: anchor_anchor_pb.Proof
-        ) => void
-    ): grpc.ClientUnaryCall;
-    public getProof(
-        request: anchor_anchor_pb.ProofRequest,
-        metadata: grpc.Metadata,
-        callback: (
-            error: grpc.ServiceError | null,
-            response: anchor_anchor_pb.Proof
-        ) => void
-    ): grpc.ClientUnaryCall;
-    public getProof(
-        request: anchor_anchor_pb.ProofRequest,
-        metadata: grpc.Metadata,
-        options: Partial<grpc.CallOptions>,
-        callback: (
-            error: grpc.ServiceError | null,
-            response: anchor_anchor_pb.Proof
-        ) => void
-    ): grpc.ClientUnaryCall;
-    public submitProof(
-        request: anchor_anchor_pb.SubmitProofRequest,
-        callback: (
-            error: grpc.ServiceError | null,
-            response: anchor_anchor_pb.Proof
-        ) => void
-    ): grpc.ClientUnaryCall;
-    public submitProof(
-        request: anchor_anchor_pb.SubmitProofRequest,
-        metadata: grpc.Metadata,
-        callback: (
-            error: grpc.ServiceError | null,
-            response: anchor_anchor_pb.Proof
-        ) => void
-    ): grpc.ClientUnaryCall;
-    public submitProof(
-        request: anchor_anchor_pb.SubmitProofRequest,
-        metadata: grpc.Metadata,
-        options: Partial<grpc.CallOptions>,
-        callback: (
-            error: grpc.ServiceError | null,
-            response: anchor_anchor_pb.Proof
-        ) => void
-    ): grpc.ClientUnaryCall;
-    public verifyProof(
-        request: anchor_anchor_pb.VerifyProofRequest,
-        callback: (
-            error: grpc.ServiceError | null,
-            response: anchor_anchor_pb.VerifyProofReply
-        ) => void
-    ): grpc.ClientUnaryCall;
-    public verifyProof(
-        request: anchor_anchor_pb.VerifyProofRequest,
-        metadata: grpc.Metadata,
-        callback: (
-            error: grpc.ServiceError | null,
-            response: anchor_anchor_pb.VerifyProofReply
-        ) => void
-    ): grpc.ClientUnaryCall;
-    public verifyProof(
-        request: anchor_anchor_pb.VerifyProofRequest,
-        metadata: grpc.Metadata,
-        options: Partial<grpc.CallOptions>,
-        callback: (
-            error: grpc.ServiceError | null,
-            response: anchor_anchor_pb.VerifyProofReply
-        ) => void
-    ): grpc.ClientUnaryCall;
-    public getBatch(
-        request: anchor_anchor_pb.BatchRequest,
-        callback: (
-            error: grpc.ServiceError | null,
-            response: anchor_anchor_pb.Batch
-        ) => void
-    ): grpc.ClientUnaryCall;
-    public getBatch(
-        request: anchor_anchor_pb.BatchRequest,
-        metadata: grpc.Metadata,
-        callback: (
-            error: grpc.ServiceError | null,
-            response: anchor_anchor_pb.Batch
-        ) => void
-    ): grpc.ClientUnaryCall;
-    public getBatch(
-        request: anchor_anchor_pb.BatchRequest,
-        metadata: grpc.Metadata,
-        options: Partial<grpc.CallOptions>,
-        callback: (
-            error: grpc.ServiceError | null,
-            response: anchor_anchor_pb.Batch
-        ) => void
-    ): grpc.ClientUnaryCall;
-    public subscribeBatches(
-        request: anchor_anchor_pb.SubscribeBatchesRequest,
-        options?: Partial<grpc.CallOptions>
-    ): grpc.ClientReadableStream<anchor_anchor_pb.Batch>;
-    public subscribeBatches(
-        request: anchor_anchor_pb.SubscribeBatchesRequest,
-        metadata?: grpc.Metadata,
-        options?: Partial<grpc.CallOptions>
-    ): grpc.ClientReadableStream<anchor_anchor_pb.Batch>;
+export class AnchorServiceClient extends grpc.Client implements IAnchorServiceClient {
+    constructor(address: string, credentials: grpc.ChannelCredentials, options?: Partial<grpc.ClientOptions>);
+    public getAnchors(request: google_protobuf_empty_pb.Empty, options?: Partial<grpc.CallOptions>): grpc.ClientReadableStream<anchor_anchor_pb.Anchor>;
+    public getAnchors(request: google_protobuf_empty_pb.Empty, metadata?: grpc.Metadata, options?: Partial<grpc.CallOptions>): grpc.ClientReadableStream<anchor_anchor_pb.Anchor>;
+    public getAnchor(request: anchor_anchor_pb.AnchorRequest, callback: (error: grpc.ServiceError | null, response: anchor_anchor_pb.Anchor) => void): grpc.ClientUnaryCall;
+    public getAnchor(request: anchor_anchor_pb.AnchorRequest, metadata: grpc.Metadata, callback: (error: grpc.ServiceError | null, response: anchor_anchor_pb.Anchor) => void): grpc.ClientUnaryCall;
+    public getAnchor(request: anchor_anchor_pb.AnchorRequest, metadata: grpc.Metadata, options: Partial<grpc.CallOptions>, callback: (error: grpc.ServiceError | null, response: anchor_anchor_pb.Anchor) => void): grpc.ClientUnaryCall;
+    public getProof(request: anchor_anchor_pb.ProofRequest, callback: (error: grpc.ServiceError | null, response: anchor_anchor_pb.Proof) => void): grpc.ClientUnaryCall;
+    public getProof(request: anchor_anchor_pb.ProofRequest, metadata: grpc.Metadata, callback: (error: grpc.ServiceError | null, response: anchor_anchor_pb.Proof) => void): grpc.ClientUnaryCall;
+    public getProof(request: anchor_anchor_pb.ProofRequest, metadata: grpc.Metadata, options: Partial<grpc.CallOptions>, callback: (error: grpc.ServiceError | null, response: anchor_anchor_pb.Proof) => void): grpc.ClientUnaryCall;
+    public submitProof(request: anchor_anchor_pb.SubmitProofRequest, callback: (error: grpc.ServiceError | null, response: anchor_anchor_pb.Proof) => void): grpc.ClientUnaryCall;
+    public submitProof(request: anchor_anchor_pb.SubmitProofRequest, metadata: grpc.Metadata, callback: (error: grpc.ServiceError | null, response: anchor_anchor_pb.Proof) => void): grpc.ClientUnaryCall;
+    public submitProof(request: anchor_anchor_pb.SubmitProofRequest, metadata: grpc.Metadata, options: Partial<grpc.CallOptions>, callback: (error: grpc.ServiceError | null, response: anchor_anchor_pb.Proof) => void): grpc.ClientUnaryCall;
+    public verifyProof(request: anchor_anchor_pb.VerifyProofRequest, callback: (error: grpc.ServiceError | null, response: anchor_anchor_pb.VerifyProofReply) => void): grpc.ClientUnaryCall;
+    public verifyProof(request: anchor_anchor_pb.VerifyProofRequest, metadata: grpc.Metadata, callback: (error: grpc.ServiceError | null, response: anchor_anchor_pb.VerifyProofReply) => void): grpc.ClientUnaryCall;
+    public verifyProof(request: anchor_anchor_pb.VerifyProofRequest, metadata: grpc.Metadata, options: Partial<grpc.CallOptions>, callback: (error: grpc.ServiceError | null, response: anchor_anchor_pb.VerifyProofReply) => void): grpc.ClientUnaryCall;
+    public getBatch(request: anchor_anchor_pb.BatchRequest, callback: (error: grpc.ServiceError | null, response: anchor_anchor_pb.Batch) => void): grpc.ClientUnaryCall;
+    public getBatch(request: anchor_anchor_pb.BatchRequest, metadata: grpc.Metadata, callback: (error: grpc.ServiceError | null, response: anchor_anchor_pb.Batch) => void): grpc.ClientUnaryCall;
+    public getBatch(request: anchor_anchor_pb.BatchRequest, metadata: grpc.Metadata, options: Partial<grpc.CallOptions>, callback: (error: grpc.ServiceError | null, response: anchor_anchor_pb.Batch) => void): grpc.ClientUnaryCall;
+    public subscribeBatches(request: anchor_anchor_pb.SubscribeBatchesRequest, options?: Partial<grpc.CallOptions>): grpc.ClientReadableStream<anchor_anchor_pb.Batch>;
+    public subscribeBatches(request: anchor_anchor_pb.SubscribeBatchesRequest, metadata?: grpc.Metadata, options?: Partial<grpc.CallOptions>): grpc.ClientReadableStream<anchor_anchor_pb.Batch>;
 }
