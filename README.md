@@ -2,7 +2,7 @@
 
 The ProvenDB SDK for Node.
 
-**NOTE**: The SDK is in alpha and not recommended for production use. For any bugs, please raise an [issue](https://github.com/SouthbankSoftware/provendb-sdk-node/issues).
+**NOTE**: The SDK is is in beta.  For any bugs, please raise an [issue](https://github.com/SouthbankSoftware/provendb-sdk-node/issues).
 
 The use of our services requires an API key. Visit [provendb.com](https://provendb.com) to sign in/register and create one.
 
