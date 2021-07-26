@@ -309,34 +309,10 @@ export class Tree {
         if (this.nodes === 0) {
             return true;
         }
-        let current: string[] = [];
-        let leaves = this.getLeaves();
-        leaves.forEach((l) => current.push(l.value));
-        let layer = [];
-        // Loop through until we have a single node i.e. root hash.
-        while (current.length > 1) {
-            // Loop through the nodes with increments of 2 (pairs)
-            for (let i = 0; i < current.length; i += 2) {
-                // If we have an odd node, we promote it.
-                if (i + 1 === current.length) {
-                    layer.push(current[i]);
-                } else {
-                    let hash = crypto
-                        .createHash(this.algorithm)
-                        .update(
-                            Buffer.concat([
-                                Buffer.from(current[i], "hex"),
-                                Buffer.from(current[i + 1], "hex"),
-                            ])
-                        )
-                        .digest("hex");
-                    layer.push(hash);
-                }
-            }
-            current = layer;
-            layer = [];
-        }
-        return current[0] === this.getRoot();
+        let leaves: string[] = [];
+        this.getLeaves().forEach((l) => leaves.push(l.value));
+        let layers: string[][] = build(leaves, this.algorithm)
+        return layers[layers.length - 1][0] === this.getRoot();
     }
 }
 
@@ -367,11 +343,10 @@ export class Writer {
  * A builder to dynamically construct a new Merkle tree.
  */
 export class Builder {
-    private layers: string[][] = [];
+    private leaves: string[] = [];
 
     constructor(private algorithm: string) {
         validateAlgorithm(algorithm);
-        this.layers.push([]);
     }
     /**
      * Adds a single leaf to the tree.
@@ -379,7 +354,7 @@ export class Builder {
      * @param value the value
      */
     add(key: string, value: Buffer): Builder {
-        this.layers[0].push(key + ":" + this.createHash(value));
+        this.leaves.push(key + ":" + createHash(value, this.algorithm));
         return this;
     }
 
@@ -400,7 +375,7 @@ export class Builder {
      */
     writeStream(key: string): Writer {
         return new Writer(this.algorithm, key, (key: string, hex: string) => {
-            this.layers[0].push(key + ":" + hex);
+            this.leaves.push(key + ":" + hex);
         });
     }
 
@@ -416,62 +391,73 @@ export class Builder {
      */
     build(): Tree {
         // Perform some validation
-        if (this.layers[0].length === 0) {
+        if (this.leaves.length === 0) {
             throw new Error("a tree must contain at least 1 leaf");
         }
         // Build the tree only if there is more than one leaf.
-        if (this.layers[0].length > 1) {
-            this._build(this.layers[0]);
+        if (this.leaves.length > 1) {
+            return new Tree(this.algorithm, build(this.leaves, this.algorithm));
         }
-        return new Tree(this.algorithm, this.layers);
+        return new Tree(this.algorithm, [this.leaves]);
     }
+}
 
-    private _build(nodes: string[]) {
-        // Loop through until we have a single node i.e. root hash.
-        while (nodes.length > 1) {
-            // Get the index of the next level and push an empty array.
-            let layerIndex = this.layers.length;
-            this.layers.push([]);
-            // Loop through the nodes with increments of 2 (pairs)
-            for (let i = 0; i < nodes.length; i += 2) {
-                // If we have an odd node, we promote it.
-                if (i + 1 === nodes.length) {
-                    let s: string = nodes[i];
-                    if (nodes[i].includes(":")) {
-                        s = nodes[i].split(":")[1];
-                    }
-                    this.layers[layerIndex].push(s);
-                } else {
-                    // If at least one node includes a key, split both.
-                    let s1: string = nodes[i];
-                    let s2: string = nodes[i + 1];
-                    if (nodes[i].includes(":")) {
-                        s1 = nodes[i].split(":")[1];
-                        s2 = nodes[i + 1].split(":")[1];
-                    }
-                    var hash = this.createHash(
-                        Buffer.concat([
-                            Buffer.from(s1, "hex"),
-                            Buffer.from(s2, "hex"),
-                        ])
-                    );
-                    this.layers[layerIndex].push(hash);
+/**
+ * Builds a merkle tree based on the initial leaf values.
+ * @param data the leaves
+ * @returns the built tree
+ */
+export function build(leaves: string[], algorithm: string): string[][] {
+    let layers: string[][] = []
+    // Push the leaf layer and assign first node layer
+    layers.push(leaves);
+    let nodes: string[] = leaves;
+
+    // Loop through until we have a single node i.e. root hash.
+    while (nodes.length > 1) {
+        // Get the index of the next level and push an empty array.
+        let layerIndex = layers.length;
+        layers.push([]);
+        // Loop through the nodes with increments of 2 (pairs)
+        for (let i = 0; i < nodes.length; i += 2) {
+            // If we have an odd node, we promote it.
+            if (i + 1 === nodes.length) {
+                let s: string = nodes[i];
+                if (nodes[i].includes(":")) {
+                    s = nodes[i].split(":")[1];
                 }
+                layers[layerIndex].push(s);
+            } else {
+                // If at least one node includes a key, split both.
+                let s1: string = nodes[i];
+                let s2: string = nodes[i + 1];
+                if (nodes[i].includes(":")) {
+                    s1 = nodes[i].split(":")[1];
+                    s2 = nodes[i + 1].split(":")[1];
+                }
+                var hash = createHash(
+                    Buffer.concat([
+                        Buffer.from(s1, "hex"),
+                        Buffer.from(s2, "hex"),
+                    ]), algorithm
+                );
+                layers[layerIndex].push(hash);
             }
-            nodes = this.layers[layerIndex];
         }
+        nodes = layers[layerIndex];
     }
+    return layers;
+}
 
-    /**
-     * Creates a hash of the data.
-     * @param data the data to hash.
-     */
-    private createHash(data: Buffer): string {
-        return crypto
-            .createHash(normalizeAlgorithm(this.algorithm))
-            .update(data)
-            .digest("hex");
-    }
+/**
+ * Creates a hash of the data.
+ * @param data the data to hash.
+ */
+function createHash(data: Buffer, algorithm: string): string {
+    return crypto
+        .createHash(normalizeAlgorithm(algorithm))
+        .update(data)
+        .digest("hex");
 }
 
 function validateAlgorithm(algorithm: string) {
