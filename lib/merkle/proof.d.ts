@@ -11,3 +11,10 @@ import { Path } from "./merkle";
  * @returns the updated proof
  */
 export declare function addPathToProof(proof: anchor.AnchorProof, hash: string, algorithm: string, path: Path[], label?: string): anchor.AnchorProof;
+/**
+ * Retrieves Hedera transaction directly from Kabuto.
+ * @param id the transaction ID.
+ * @param testnet whether the transaction is from the testnet
+ */
+export declare function validateHederaTransaction(txnId: string, expected: string, testnet: boolean): Promise<boolean>;
+export declare function validateEthereumTransaction(txnId: string, hash: string, testnet: boolean): Promise<boolean>;

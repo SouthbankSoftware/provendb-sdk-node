@@ -1,5 +1,6 @@
 import * as anchor from "../anchor";
-import { Path, Leaf, build } from "./merkle";
+import { Path, build, Tree } from "./merkle";
+import https from "https";
 
 /**
  * Adds a merkle path to an existing proof.
@@ -66,49 +67,44 @@ function addPathCHP(
     };
 }
 
-interface ValidateProofOptions {
-    credentials: string // credentials for API calls.
-    isPath: boolean // whether this is a path proof
+/**
+ * Retrieves Hedera transaction directly from Kabuto.
+ * @param id the transaction ID.
+ * @param testnet whether the transaction is from the testnet
+ */
+export function validateHederaTransaction(
+    txnId: string,
+    expected: string,
+    testnet: boolean
+): Promise<boolean> {
+    return new Promise<boolean>((res, rej) => {
+        const options = {
+            hostname: testnet ? "api.testnet.kabuto.sh" : "api.kabuto.sh",
+            port: 443,
+            path: "/v1/transaction/" + txnId,
+            method: "GET",
+        };
+        const req = https.get(options, (r) => {
+            let body = "";
+            r.on("data", (d) => {
+                body += d;
+            });
+            r.on("end", () => {
+                let json = JSON.parse(body);
+                // Validate the memo field against the hash.
+                res(json.memo === expected);
+            });
+            r.on("error", (e) => {
+                rej(e);
+            });
+        });
+    });
 }
 
-export type ValidateProofOption = (options: ValidateProofOptions) => void;
-
-export function validateProofWithCredentials(credentials: string): ValidateProofOption {
-    return function(options: ValidateProofOptions) {
-        options.credentials = credentials;
-    };
-};
-
-export function validateProofWithPath(isPath: boolean): ValidateProofOption {
-    return function(options: ValidateProofOptions) {
-        options.isPath = isPath;
-    };
-};
-
-/**
- * Validates the proof by calculating a root hash from the leaves provided, checking it matches the proof's hash, 
- * and validates the proof data with the expected blockchain hash.
- * @param proof the proof
- * @param leaves the leaves
- * @returns true if valid, else false
- */
-export function validateProof(proof: anchor.AnchorProof, leaves: string[], algorithm: string, ...opts: ValidateProofOption[]): boolean {
-    let options: ValidateProofOptions = {
-        credentials: "",
-        isPath: false,
-    };
-    opts.forEach(o => o(options))
-
-    // Ensure proof is CHP and validate it.
-    if (anchor.getProofFormat(proof.format) != anchor.Proof.Format.CHP_PATH ||
-        anchor.getProofFormat(proof.format) != anchor.Proof.Format.CHP_PATH_SIGNED) {
-            throw new Error("proof format not supported")
-    }
-
-    // Build the leaves
-    let layers: string[][] = build(leaves, algorithm)
-    let root = layers[layers.length - 1][0]
-
-    // Check that the root matches the hash associated with the proof.
-    return false
+export function validateEthereumTransaction(
+    txnId: string,
+    hash: string,
+    testnet: boolean
+): Promise<boolean> {
+    return new Promise((res, rej) => {});
 }

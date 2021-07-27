@@ -1,7 +1,12 @@
 import crypto from "crypto";
 import fs from "fs";
 import { anchor } from "..";
-import { addPathToProof } from "./proof";
+import {
+    addPathToProof,
+    validateHederaTransaction,
+    validateEthereumTransaction,
+} from "./proof";
+import { parse } from "chainpoint-parse";
 
 /**
  * Leaf represents a single leaf in a merkle tree.
@@ -36,6 +41,27 @@ export interface File {
 export interface Path {
     l?: string;
     r?: string;
+}
+
+interface ValidateProofOptions {
+    credentials: string; // credentials for API calls.
+    isPath: boolean; // whether this is a path proof
+}
+
+export type ValidateProofOption = (options: ValidateProofOptions) => void;
+
+export function validateProofWithCredentials(
+    credentials: string
+): ValidateProofOption {
+    return function (options: ValidateProofOptions) {
+        options.credentials = credentials;
+    };
+}
+
+export function validateProofWithPath(isPath: boolean): ValidateProofOption {
+    return function (options: ValidateProofOptions) {
+        options.isPath = isPath;
+    };
 }
 
 /**
@@ -163,7 +189,7 @@ export class Tree {
      * @returns the leaf
      */
     getLeaf(key: string): Leaf | null {
-        let leaf = null;
+        let leaf: Leaf | null = null;
         this.layers[0].forEach((v) => {
             let l: Leaf = toLeaf(v);
             if (l.key === key) {
@@ -302,6 +328,143 @@ export class Tree {
     }
 
     /**
+     * Validates the proof by calculating a root hash from the leaves provided, checking it matches the proof's hash,
+     * and validates the proof data with the expected blockchain hash.
+     * @param proof the proof
+     * @param opts the options
+     * @returns true if valid, else false
+     */
+    validateProof(
+        proof: anchor.AnchorProof,
+        ...opts: ValidateProofOption[]
+    ): Promise<boolean> {
+        return new Promise((res, rej) => {
+            // Set the options
+            let options: ValidateProofOptions = {
+                credentials: "",
+                isPath: false,
+            };
+            opts.forEach((o) => o(options));
+
+            // Ensure proof is CHP and validate it.
+            let format: anchor.Proof.Format = anchor.getProofFormat(
+                proof.format
+            );
+            if (
+                format === anchor.Proof.Format.ETH_TRIE ||
+                format === anchor.Proof.Format.ETH_TRIE_SIGNED
+            ) {
+                rej(new Error("proof format not supported"));
+                return;
+            }
+            // Parse the chainpoint proof.
+            let result: any;
+            try {
+                result = parse(proof.data);
+            } catch (e) {
+                rej(e);
+                return;
+            }
+
+            // Check that the proof hash matches the generated tree hash
+            if (result.hash !== this.getRoot()) {
+                res(false);
+                return;
+            }
+
+            // Get the expected blockchain hash
+            let branch = result.branches[0];
+            let exp: string;
+            while (true) {
+                if (branch.branches !== undefined) {
+                    branch = branch.branches[0];
+                } else {
+                    exp = branch.anchors[0]["expected_value"];
+                    break;
+                }
+            }
+
+            switch (anchor.getAnchorType(proof.anchorType)) {
+                case anchor.Anchor.Type.HEDERA:
+                    validateHederaTransaction(proof.metadata.txnId, exp, true)
+                        .then((r) => {
+                            res(r);
+                        })
+                        .catch((e) => {
+                            rej(e);
+                        });
+                    return;
+                case anchor.Anchor.Type.HEDERA_MAINNET:
+                    validateHederaTransaction(proof.metadata.txnId, exp, false)
+                        .then((r) => {
+                            res(r);
+                        })
+                        .catch((e) => {
+                            rej(e);
+                        });
+                    return;
+                case anchor.Anchor.Type.ETH:
+                    validateEthereumTransaction(proof.metadata.txnId, exp, true)
+                        .then((r) => {
+                            res(r);
+                        })
+                        .catch((e) => {
+                            rej(e);
+                        });
+                    return;
+                case anchor.Anchor.Type.ETH_MAINNET:
+                    validateEthereumTransaction(
+                        proof.metadata.txnId,
+                        exp,
+                        false
+                    )
+                        .then((r) => {
+                            res(r);
+                        })
+                        .catch((e) => {
+                            rej(e);
+                        });
+                    return;
+                case anchor.Anchor.Type.ETH_GOCHAIN:
+                    validateEthereumTransaction(
+                        proof.metadata.txnId,
+                        exp,
+                        false
+                    )
+                        .then((r) => {
+                            res(r);
+                        })
+                        .catch((e) => {
+                            rej(e);
+                        });
+                    return;
+                case anchor.Anchor.Type.ETH_ELASTOS:
+                    validateEthereumTransaction(
+                        proof.metadata.txnId,
+                        exp,
+                        false
+                    )
+                        .then((r) => {
+                            res(r);
+                        })
+                        .catch((e) => {
+                            rej(e);
+                        });
+                    return;
+                default:
+                    rej(
+                        new Error(
+                            "validation on '" +
+                                proof.anchorType +
+                                "' not supported"
+                        )
+                    );
+                    return;
+            }
+        });
+    }
+
+    /**
      * Verifies this tree by recalculating the root from all the layers.
      */
     verify(): boolean {
@@ -311,7 +474,7 @@ export class Tree {
         }
         let leaves: string[] = [];
         this.getLeaves().forEach((l) => leaves.push(l.value));
-        let layers: string[][] = build(leaves, this.algorithm)
+        let layers: string[][] = build(leaves, this.algorithm);
         return layers[layers.length - 1][0] === this.getRoot();
     }
 }
@@ -408,7 +571,7 @@ export class Builder {
  * @returns the built tree
  */
 export function build(leaves: string[], algorithm: string): string[][] {
-    let layers: string[][] = []
+    let layers: string[][] = [];
     // Push the leaf layer and assign first node layer
     layers.push(leaves);
     let nodes: string[] = leaves;
@@ -439,7 +602,8 @@ export function build(leaves: string[], algorithm: string): string[][] {
                     Buffer.concat([
                         Buffer.from(s1, "hex"),
                         Buffer.from(s2, "hex"),
-                    ]), algorithm
+                    ]),
+                    algorithm
                 );
                 layers[layerIndex].push(hash);
             }
