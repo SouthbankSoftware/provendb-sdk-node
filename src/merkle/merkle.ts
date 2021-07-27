@@ -337,7 +337,7 @@ export class Tree {
     validateProof(
         proof: anchor.AnchorProof,
         ...opts: ValidateProofOption[]
-    ): Promise<{ valid: boolean, message?: string }> {
+    ): Promise<{ valid: boolean; message?: string }> {
         return new Promise((res, rej) => {
             // Set the options
             let options: ValidateProofOptions = {
@@ -368,7 +368,10 @@ export class Tree {
 
             // Check that the proof hash data matches the generated tree hash
             if (proof.hash !== this.getRoot()) {
-                res({ valid: false, message: "proof hash and tree hash mismatch"});
+                res({
+                    valid: false,
+                    message: "proof hash and tree hash mismatch",
+                });
                 return;
             }
 

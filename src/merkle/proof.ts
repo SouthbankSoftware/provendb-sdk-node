@@ -77,7 +77,7 @@ export function validateHederaTransaction(
     txnId: string,
     expected: string,
     testnet: boolean
-): Promise<{ valid: boolean, message?: string }> {
+): Promise<{ valid: boolean; message?: string }> {
     return new Promise((res, rej) => {
         const options = {
             hostname: testnet ? "api.testnet.kabuto.sh" : "api.kabuto.sh",
@@ -94,7 +94,10 @@ export function validateHederaTransaction(
                 let json = JSON.parse(body);
                 // Validate the memo field against the hash.
                 if (json.memo !== expected) {
-                    res({ valid: false, message: "expected hash and blockchain hash mismatch" })
+                    res({
+                        valid: false,
+                        message: "expected hash and blockchain hash mismatch",
+                    });
                 } else {
                     res({ valid: true });
                 }
@@ -110,7 +113,7 @@ export function validateEthereumTransaction(
     txnId: string,
     expected: string,
     testnet: boolean
-): Promise<{ valid: boolean, message?: string }> {
+): Promise<{ valid: boolean; message?: string }> {
     return new Promise((res, rej) => {
         const options = {
             hostname: testnet ? "api-rinkeby.etherscan.io" : "api.etherscan.io",
@@ -130,9 +133,12 @@ export function validateEthereumTransaction(
                 let json = JSON.parse(body);
                 // Validate the txn input with expected
                 if (json.result.input !== "0x" + expected) {
-                    res({ valid: false, message: "expected hash and blockchain hash mismatch"})
+                    res({
+                        valid: false,
+                        message: "expected hash and blockchain hash mismatch",
+                    });
                 } else {
-                    res({ valid: true })
+                    res({ valid: true });
                 }
             });
             r.on("error", (e) => {

@@ -140,7 +140,10 @@ export declare class Tree {
      * @param opts the options
      * @returns true if valid, else false
      */
-    validateProof(proof: anchor.AnchorProof, ...opts: ValidateProofOption[]): Promise<boolean>;
+    validateProof(proof: anchor.AnchorProof, ...opts: ValidateProofOption[]): Promise<{
+        valid: boolean;
+        message?: string;
+    }>;
     /**
      * Verifies this tree by recalculating the root from all the layers.
      */
