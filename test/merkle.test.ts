@@ -1,4 +1,4 @@
-import { newBuilder, importTree, Path, File } from "../src/merkle/merkle";
+import { newBuilder, importTree, Path, File, Tree } from "../src/merkle/merkle";
 // The leaves (a, b, c, ... p) are hashed using a utf8 encoded string, and all hashes following are hashed
 // using hex encoded strings. There should be enough data here to create your test cases.
 const a = "ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb";
@@ -816,17 +816,15 @@ describe("Test Tree", () => {
     });
 
     it("Should validate multi proof", async() => {
-        let builder = newBuilder("sha-256");
-        builder.add("a", Buffer.from("a"));
-        builder.add("b", Buffer.from("b"));
-        builder.add("c", Buffer.from("c"));
-        builder.add("d", Buffer.from("d"));
-        builder.add("e", Buffer.from("e"));
-        builder.add("f", Buffer.from("f"));
-        builder.add("g", Buffer.from("g"));
-        builder.add("h", Buffer.from("h"));
-
-        builder.addBatch([
+        let tree = newBuilder("sha-256").addBatch([
+            { key: "a", value: Buffer.from("a") },
+            { key: "b", value: Buffer.from("b") },
+            { key: "c", value: Buffer.from("c") },
+            { key: "d", value: Buffer.from("d") },
+            { key: "e", value: Buffer.from("e") },
+            { key: "f", value: Buffer.from("f") },
+            { key: "g", value: Buffer.from("g") },
+            { key: "h", value: Buffer.from("h") },
             { key: "i", value: Buffer.from("i") },
             { key: "j", value: Buffer.from("j") },
             { key: "k", value: Buffer.from("k") },
@@ -834,21 +832,40 @@ describe("Test Tree", () => {
             { key: "m", value: Buffer.from("m") },
             { key: "n", value: Buffer.from("n") },
             { key: "o", value: Buffer.from("o") },
-        ]);
+        ]).build();
 
-        let tree = builder.build();
-
-        await expect(tree.validateProof(HEDERA_MAINNET_PROOF)).resolves.toBe(true);
-        await expect(tree.validateProof(HEDERA_TESTNET_PROOF)).resolves.toBe(true);
-        await expect(tree.validateProof(ETHEREUM_TESTNET_PROOF)).resolves.toBe(true);
+        await expect(tree.validateProof(HEDERA_MAINNET_PROOF)).resolves.toMatchObject({ valid: true });
+        await expect(tree.validateProof(HEDERA_TESTNET_PROOF)).resolves.toMatchObject({ valid: true });
+        await expect(tree.validateProof(ETHEREUM_TESTNET_PROOF)).resolves.toMatchObject({ valid: true });
     })
 
     it("Should validate multi proof with path", async() => {
-        let builder = newBuilder("sha-256");
-        builder.add("c", Buffer.from("c"));
-        let tree = builder.build();
-        await expect(tree.validateProof(HEDERA_MAINNET_PROOF_PATH)).resolves.toBe(true);
-        await expect(tree.validateProof(HEDERA_TESTNET_PROOF_PATH)).resolves.toBe(true);
-        await expect(tree.validateProof(ETHEREUM_TESTNET_PROOF_PATH)).resolves.toBe(true);
+        let tree = newBuilder("sha-256").add("c", Buffer.from("c")).build();
+        await expect(tree.validateProof(HEDERA_MAINNET_PROOF_PATH)).resolves.toMatchObject({ valid: true });
+        await expect(tree.validateProof(HEDERA_TESTNET_PROOF_PATH)).resolves.toMatchObject({ valid: true });
+        await expect(tree.validateProof(ETHEREUM_TESTNET_PROOF_PATH)).resolves.toMatchObject({ valid: true });
+    })
+
+    it("Should NOT validate multi proof", async() => {
+        let tree = newBuilder("sha-256").addBatch([
+            { key: "a", value: Buffer.from("a") },
+            { key: "b", value: Buffer.from("b") },
+            { key: "c", value: Buffer.from("c") },
+            { key: "d", value: Buffer.from("d") },
+            { key: "e", value: Buffer.from("e") },
+            { key: "f", value: Buffer.from("f") },
+            { key: "g", value: Buffer.from("g") },
+            { key: "h", value: Buffer.from("h") },
+            { key: "i", value: Buffer.from("i") },
+            { key: "j", value: Buffer.from("j") },
+            { key: "k", value: Buffer.from("k") },
+            { key: "l", value: Buffer.from("l") },
+            { key: "m", value: Buffer.from("m") },
+            { key: "n", value: Buffer.from("n") },
+            { key: "o", value: Buffer.from("o") },
+        ]).build();
+        let p = HEDERA_MAINNET_PROOF
+        p.hash = "mismatch";
+        await expect(tree.validateProof(p)).resolves.toMatchObject({ valid: false, message: "proof hash and tree hash mismatch" });
     })
 });

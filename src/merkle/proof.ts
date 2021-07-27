@@ -1,6 +1,7 @@
 import * as anchor from "../anchor";
 import { Path, build, Tree } from "./merkle";
 import https from "https";
+import exp from "constants";
 
 /**
  * Adds a merkle path to an existing proof.
@@ -76,8 +77,8 @@ export function validateHederaTransaction(
     txnId: string,
     expected: string,
     testnet: boolean
-): Promise<boolean> {
-    return new Promise<boolean>((res, rej) => {
+): Promise<{ valid: boolean, message?: string }> {
+    return new Promise((res, rej) => {
         const options = {
             hostname: testnet ? "api.testnet.kabuto.sh" : "api.kabuto.sh",
             port: 443,
@@ -92,7 +93,11 @@ export function validateHederaTransaction(
             r.on("end", () => {
                 let json = JSON.parse(body);
                 // Validate the memo field against the hash.
-                res(json.memo === expected);
+                if (json.memo !== expected) {
+                    res({ valid: false, message: "expected hash and blockchain hash mismatch" })
+                } else {
+                    res({ valid: true });
+                }
             });
             r.on("error", (e) => {
                 rej(e);
@@ -105,7 +110,7 @@ export function validateEthereumTransaction(
     txnId: string,
     expected: string,
     testnet: boolean
-): Promise<boolean> {
+): Promise<{ valid: boolean, message?: string }> {
     return new Promise((res, rej) => {
         const options = {
             hostname: testnet ? "api-rinkeby.etherscan.io" : "api.etherscan.io",
@@ -124,7 +129,11 @@ export function validateEthereumTransaction(
             r.on("end", () => {
                 let json = JSON.parse(body);
                 // Validate the txn input with expected
-                res(json.result.input === "0x" + expected);
+                if (json.result.input !== "0x" + expected) {
+                    res({ valid: false, message: "expected hash and blockchain hash mismatch"})
+                } else {
+                    res({ valid: true })
+                }
             });
             r.on("error", (e) => {
                 rej(e);
