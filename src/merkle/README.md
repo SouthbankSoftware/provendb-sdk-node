@@ -9,6 +9,7 @@ A library for constructing a Merkle tree.
     - [Building a MerkleTree](#building-a-merkletree)
     - [Exploring a MerkleTree](#exploring-a-merkletree)
     - [Adding Merkle Path to Proof](#adding-merkle-path-to-proof)
+    - [Validating a Proof](#validating-a-proof)
     - [File](#file)
         - [Export](#export)
         - [Import](#import)
@@ -100,7 +101,7 @@ let tree = merkle.newBuilder("sha-256").addBatch([
     { key: "key8", value: Buffer.from("r") },
     { key: "key9", value: Buffer.from("e") },
     { key: "key10", value: Buffer.from("e") },
-]);
+]).build();
 ```
 
 We can retrieve the tree information as follows:
@@ -239,6 +240,49 @@ A proof with the path should look like the following:
         }
     ]
 }
+```
+
+### Validating A Proof
+
+Once you have a confirmed proof, it can be validated independently of ProvenDB using `validateProof()`.
+
+To validate, simply build a new a tree object of the data you expect to be validated and provide that proof
+that the data is to be validated against.
+
+```js
+let tree = merkle.newBuilder("sha-256").addBatch([
+    { key: "key1", value: Buffer.from("m") },
+    { key: "key2", value: Buffer.from("e") },
+    { key: "key3", value: Buffer.from("r") },
+    { key: "key4", value: Buffer.from("k") },
+    { key: "key5", value: Buffer.from("l") },
+    { key: "key6", value: Buffer.from("e") },
+    { key: "key7", value: Buffer.from("t") },
+    { key: "key8", value: Buffer.from("r") },
+    { key: "key9", value: Buffer.from("e") },
+    { key: "key10", value: Buffer.from("e") },
+]).build();
+
+let proof = // your anchor proof you have stored that you want the data validated against
+
+tree.validateProof(proof)
+    .then(isValid => console.log(isValid))
+    .catch(error => console.log(error));
+```
+
+If you would like to validate a proof that contains a path from a leaf node of tree you built, build a new
+tree object with a single leaf.
+
+```js
+let tree = merkle.newBuilder("sha-256").addBatch([
+    { key: "key1", value: Buffer.from("m") }
+]).build();
+
+let proof = // your anchor path proof you have stored that you want the data validated against
+
+tree.validateProof(proof)
+    .then(isValid => console.log(isValid))
+    .catch(error => console.log(error));
 ```
 
 ### File

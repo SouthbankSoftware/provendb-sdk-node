@@ -110,7 +110,10 @@ export function validateEthereumTransaction(
         const options = {
             hostname: testnet ? "api-rinkeby.etherscan.io" : "api.etherscan.io",
             port: 443,
-            path: "/api?module=proxy&action=eth_getTransactionByHash&txhash=0x" + txnId + "&apikey=PPAP7QM5JTQZBD5BDNUD7VMS4RB3DJWTDV",
+            path:
+                "/api?module=proxy&action=eth_getTransactionByHash&txhash=0x" +
+                txnId +
+                "&apikey=PPAP7QM5JTQZBD5BDNUD7VMS4RB3DJWTDV",
             method: "GET",
         };
         const req = https.get(options, (r) => {
@@ -121,7 +124,7 @@ export function validateEthereumTransaction(
             r.on("end", () => {
                 let json = JSON.parse(body);
                 // Validate the txn input with expected
-                res(json.result.input === ("0x" + expected));
+                res(json.result.input === "0x" + expected);
             });
             r.on("error", (e) => {
                 rej(e);

@@ -17,4 +17,4 @@ export declare function addPathToProof(proof: anchor.AnchorProof, hash: string, 
  * @param testnet whether the transaction is from the testnet
  */
 export declare function validateHederaTransaction(txnId: string, expected: string, testnet: boolean): Promise<boolean>;
-export declare function validateEthereumTransaction(txnId: string, hash: string, testnet: boolean): Promise<boolean>;
+export declare function validateEthereumTransaction(txnId: string, expected: string, testnet: boolean): Promise<boolean>;
