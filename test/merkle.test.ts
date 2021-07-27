@@ -840,6 +840,7 @@ describe("Test Tree", () => {
 
         await expect(tree.validateProof(HEDERA_MAINNET_PROOF)).resolves.toBe(true);
         await expect(tree.validateProof(HEDERA_TESTNET_PROOF)).resolves.toBe(true);
+        await expect(tree.validateProof(ETHEREUM_TESTNET_PROOF)).resolves.toBe(true);
     })
 
     it("Should validate multi proof with path", async() => {
@@ -848,5 +849,6 @@ describe("Test Tree", () => {
         let tree = builder.build();
         await expect(tree.validateProof(HEDERA_MAINNET_PROOF_PATH)).resolves.toBe(true);
         await expect(tree.validateProof(HEDERA_TESTNET_PROOF_PATH)).resolves.toBe(true);
+        await expect(tree.validateProof(ETHEREUM_TESTNET_PROOF_PATH)).resolves.toBe(true);
     })
 });

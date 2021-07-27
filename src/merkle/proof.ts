@@ -103,8 +103,29 @@ export function validateHederaTransaction(
 
 export function validateEthereumTransaction(
     txnId: string,
-    hash: string,
+    expected: string,
     testnet: boolean
 ): Promise<boolean> {
-    return new Promise((res, rej) => {});
+    return new Promise((res, rej) => {
+        const options = {
+            hostname: testnet ? "api-rinkeby.etherscan.io" : "api.etherscan.io",
+            port: 443,
+            path: "/api?module=proxy&action=eth_getTransactionByHash&txhash=0x" + txnId + "&apikey=PPAP7QM5JTQZBD5BDNUD7VMS4RB3DJWTDV",
+            method: "GET",
+        };
+        const req = https.get(options, (r) => {
+            let body = "";
+            r.on("data", (d) => {
+                body += d;
+            });
+            r.on("end", () => {
+                let json = JSON.parse(body);
+                // Validate the txn input with expected
+                res(json.result.input === ("0x" + expected));
+            });
+            r.on("error", (e) => {
+                rej(e);
+            });
+        });
+    });
 }
