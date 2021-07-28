@@ -24,10 +24,27 @@ export interface File {
      */
     data: string[][];
 }
+/**
+ * Path interface for a merkle path of left and right values.
+ */
 export interface Path {
     l?: string;
     r?: string;
 }
+interface ValidateProofOptions {
+    credentials: string;
+    isPath: boolean;
+}
+/**
+ * Option type to pass to validateProof()
+ */
+declare type ValidateProofOption = (options: ValidateProofOptions) => void;
+/**
+ * Credentials to pass when validating against external blockchain APIs.
+ * @param credentials the credentials
+ * @returns the option
+ */
+export declare function validateProofWithCredentials(credentials: string): ValidateProofOption;
 /**
  * Imports the given merkle file.
  * @param file the merkle file
@@ -127,6 +144,17 @@ export declare class Tree {
      */
     nNodes(): number;
     /**
+     * Validates a proof against this tree by checking the tree's hash matches the proof hash,
+     * and validates the proof receipt matches the expected blockchain hash.
+     * @param proof the proof
+     * @param opts the options
+     * @returns true if valid, else false
+     */
+    validateProof(proof: anchor.AnchorProof, ...opts: ValidateProofOption[]): Promise<{
+        valid: boolean;
+        message?: string;
+    }>;
+    /**
      * Verifies this tree by recalculating the root from all the layers.
      */
     verify(): boolean;
@@ -148,7 +176,7 @@ export declare class Writer {
  */
 export declare class Builder {
     private algorithm;
-    private layers;
+    private leaves;
     constructor(algorithm: string);
     /**
      * Adds a single leaf to the tree.
@@ -177,10 +205,11 @@ export declare class Builder {
      * Builds the merkle tree.
      */
     build(): Tree;
-    private _build;
-    /**
-     * Creates a hash of the data.
-     * @param data the data to hash.
-     */
-    private createHash;
 }
+/**
+ * Builds a merkle tree based on the initial leaf values.
+ * @param data the leaves
+ * @returns the built tree
+ */
+export declare function build(leaves: string[], algorithm: string): string[][];
+export {};

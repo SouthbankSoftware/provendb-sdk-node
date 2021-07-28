@@ -72,26 +72,27 @@
 						<section class="tsd-index-section ">
 							<h3>Classes</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-class tsd-parent-kind-namespace"><a href="../classes/merkle.builder.html" class="tsd-kind-icon">Builder</a></li>
-								<li class="tsd-kind-class tsd-parent-kind-namespace"><a href="../classes/merkle.tree.html" class="tsd-kind-icon">Tree</a></li>
-								<li class="tsd-kind-class tsd-parent-kind-namespace"><a href="../classes/merkle.writer.html" class="tsd-kind-icon">Writer</a></li>
+								<li class="tsd-kind-class tsd-parent-kind-namespace"><a href="../classes/merkle.Builder.html" class="tsd-kind-icon">Builder</a></li>
+								<li class="tsd-kind-class tsd-parent-kind-namespace"><a href="../classes/merkle.Tree.html" class="tsd-kind-icon">Tree</a></li>
+								<li class="tsd-kind-class tsd-parent-kind-namespace"><a href="../classes/merkle.Writer.html" class="tsd-kind-icon">Writer</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section ">
 							<h3>Interfaces</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-interface tsd-parent-kind-namespace"><a href="../interfaces/merkle.file.html" class="tsd-kind-icon">File</a></li>
-								<li class="tsd-kind-interface tsd-parent-kind-namespace"><a href="../interfaces/merkle.leaf.html" class="tsd-kind-icon">Leaf</a></li>
-								<li class="tsd-kind-interface tsd-parent-kind-namespace"><a href="../interfaces/merkle.path.html" class="tsd-kind-icon">Path</a></li>
+								<li class="tsd-kind-interface tsd-parent-kind-namespace"><a href="../interfaces/merkle.File.html" class="tsd-kind-icon">File</a></li>
+								<li class="tsd-kind-interface tsd-parent-kind-namespace"><a href="../interfaces/merkle.Leaf.html" class="tsd-kind-icon">Leaf</a></li>
+								<li class="tsd-kind-interface tsd-parent-kind-namespace"><a href="../interfaces/merkle.Path.html" class="tsd-kind-icon">Path</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section ">
 							<h3>Functions</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-function tsd-parent-kind-namespace"><a href="merkle.html#addpathtoproof" class="tsd-kind-icon">add<wbr>Path<wbr>ToProof</a></li>
-								<li class="tsd-kind-function tsd-parent-kind-namespace"><a href="merkle.html#importtree" class="tsd-kind-icon">import<wbr>Tree</a></li>
-								<li class="tsd-kind-function tsd-parent-kind-namespace"><a href="merkle.html#importtreesync" class="tsd-kind-icon">import<wbr>Tree<wbr>Sync</a></li>
-								<li class="tsd-kind-function tsd-parent-kind-namespace"><a href="merkle.html#newbuilder" class="tsd-kind-icon">new<wbr>Builder</a></li>
+								<li class="tsd-kind-function tsd-parent-kind-namespace"><a href="merkle.html#build" class="tsd-kind-icon">build</a></li>
+								<li class="tsd-kind-function tsd-parent-kind-namespace"><a href="merkle.html#importTree" class="tsd-kind-icon">import<wbr>Tree</a></li>
+								<li class="tsd-kind-function tsd-parent-kind-namespace"><a href="merkle.html#importTreeSync" class="tsd-kind-icon">import<wbr>Tree<wbr>Sync</a></li>
+								<li class="tsd-kind-function tsd-parent-kind-namespace"><a href="merkle.html#newBuilder" class="tsd-kind-icon">new<wbr>Builder</a></li>
+								<li class="tsd-kind-function tsd-parent-kind-namespace"><a href="merkle.html#validateProofWithCredentials" class="tsd-kind-icon">validate<wbr>Proof<wbr>With<wbr>Credentials</a></li>
 							</ul>
 						</section>
 					</div>
@@ -100,72 +101,48 @@
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Functions</h2>
 				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-namespace">
-					<a name="addpathtoproof" class="tsd-anchor"></a>
-					<h3>add<wbr>Path<wbr>ToProof</h3>
+					<a name="build" class="tsd-anchor"></a>
+					<h3>build</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-namespace">
-						<li class="tsd-signature tsd-kind-icon">add<wbr>Path<wbr>ToProof<span class="tsd-signature-symbol">(</span>proof<span class="tsd-signature-symbol">: </span><a href="../interfaces/anchor.anchorproof.html" class="tsd-signature-type" data-tsd-kind="Interface">AnchorProof</a>, hash<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, algorithm<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, path<span class="tsd-signature-symbol">: </span><a href="../interfaces/merkle.path.html" class="tsd-signature-type" data-tsd-kind="Interface">Path</a><span class="tsd-signature-symbol">[]</span>, label<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../interfaces/anchor.anchorproof.html" class="tsd-signature-type" data-tsd-kind="Interface">AnchorProof</a></li>
+						<li class="tsd-signature tsd-kind-icon">build<span class="tsd-signature-symbol">(</span>leaves<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span>, algorithm<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">[]</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/SouthbankSoftware/provendb-sdk-node/blob/d18542e/src/merkle/proof.ts#L14">src/merkle/proof.ts:14</a></li>
+									<li>Defined in <a href="https://github.com/SouthbankSoftware/provendb-sdk-node/blob/13d2d2e/src/merkle/merkle.ts#L577">src/merkle/merkle.ts:577</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>Adds a merkle path to an existing proof.</p>
+									<p>Builds a merkle tree based on the initial leaf values.</p>
 								</div>
 							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>proof: <a href="../interfaces/anchor.anchorproof.html" class="tsd-signature-type" data-tsd-kind="Interface">AnchorProof</a></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>the proof to add the path to</p>
-									</div>
-								</li>
-								<li>
-									<h5>hash: <span class="tsd-signature-type">string</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>the hash the path begins at</p>
-									</div>
+									<h5>leaves: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span></h5>
 								</li>
 								<li>
 									<h5>algorithm: <span class="tsd-signature-type">string</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>the algorithm used to construct the path</p>
-									</div>
-								</li>
-								<li>
-									<h5>path: <a href="../interfaces/merkle.path.html" class="tsd-signature-type" data-tsd-kind="Interface">Path</a><span class="tsd-signature-symbol">[]</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>the path to add</p>
-									</div>
-								</li>
-								<li>
-									<h5><span class="tsd-flag ts-flagOptional">Optional</span> label: <span class="tsd-signature-type">string</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<p>the label (description)</p>
-									</div>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="../interfaces/anchor.anchorproof.html" class="tsd-signature-type" data-tsd-kind="Interface">AnchorProof</a></h4>
-							<p>the updated proof</p>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">[]</span></h4>
+							<p>the built tree</p>
 						</li>
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-namespace">
-					<a name="importtree" class="tsd-anchor"></a>
+					<a name="importTree" class="tsd-anchor"></a>
 					<h3>import<wbr>Tree</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-namespace">
-						<li class="tsd-signature tsd-kind-icon">import<wbr>Tree<span class="tsd-signature-symbol">(</span>file<span class="tsd-signature-symbol">: </span><a href="../interfaces/merkle.file.html" class="tsd-signature-type" data-tsd-kind="Interface">File</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../classes/merkle.tree.html" class="tsd-signature-type" data-tsd-kind="Class">Tree</a></li>
+						<li class="tsd-signature tsd-kind-icon">import<wbr>Tree<span class="tsd-signature-symbol">(</span>file<span class="tsd-signature-symbol">: </span><a href="../interfaces/merkle.File.html" class="tsd-signature-type" data-tsd-kind="Interface">File</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../classes/merkle.Tree.html" class="tsd-signature-type" data-tsd-kind="Class">Tree</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/SouthbankSoftware/provendb-sdk-node/blob/d18542e/src/merkle/merkle.ts#L45">src/merkle/merkle.ts:45</a></li>
+									<li>Defined in <a href="https://github.com/SouthbankSoftware/provendb-sdk-node/blob/13d2d2e/src/merkle/merkle.ts#L72">src/merkle/merkle.ts:72</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -176,27 +153,27 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>file: <a href="../interfaces/merkle.file.html" class="tsd-signature-type" data-tsd-kind="Interface">File</a></h5>
+									<h5>file: <a href="../interfaces/merkle.File.html" class="tsd-signature-type" data-tsd-kind="Interface">File</a></h5>
 									<div class="tsd-comment tsd-typography">
 										<p>the merkle file</p>
 									</div>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="../classes/merkle.tree.html" class="tsd-signature-type" data-tsd-kind="Class">Tree</a></h4>
+							<h4 class="tsd-returns-title">Returns <a href="../classes/merkle.Tree.html" class="tsd-signature-type" data-tsd-kind="Class">Tree</a></h4>
 						</li>
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-namespace">
-					<a name="importtreesync" class="tsd-anchor"></a>
+					<a name="importTreeSync" class="tsd-anchor"></a>
 					<h3>import<wbr>Tree<wbr>Sync</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-namespace">
-						<li class="tsd-signature tsd-kind-icon">import<wbr>Tree<wbr>Sync<span class="tsd-signature-symbol">(</span>path<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../classes/merkle.tree.html" class="tsd-signature-type" data-tsd-kind="Class">Tree</a></li>
+						<li class="tsd-signature tsd-kind-icon">import<wbr>Tree<wbr>Sync<span class="tsd-signature-symbol">(</span>path<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../classes/merkle.Tree.html" class="tsd-signature-type" data-tsd-kind="Class">Tree</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/SouthbankSoftware/provendb-sdk-node/blob/d18542e/src/merkle/merkle.ts#L53">src/merkle/merkle.ts:53</a></li>
+									<li>Defined in <a href="https://github.com/SouthbankSoftware/provendb-sdk-node/blob/13d2d2e/src/merkle/merkle.ts#L80">src/merkle/merkle.ts:80</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -213,21 +190,21 @@
 									</div>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="../classes/merkle.tree.html" class="tsd-signature-type" data-tsd-kind="Class">Tree</a></h4>
+							<h4 class="tsd-returns-title">Returns <a href="../classes/merkle.Tree.html" class="tsd-signature-type" data-tsd-kind="Class">Tree</a></h4>
 						</li>
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-namespace">
-					<a name="newbuilder" class="tsd-anchor"></a>
+					<a name="newBuilder" class="tsd-anchor"></a>
 					<h3>new<wbr>Builder</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-namespace">
-						<li class="tsd-signature tsd-kind-icon">new<wbr>Builder<span class="tsd-signature-symbol">(</span>algorithm<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../classes/merkle.builder.html" class="tsd-signature-type" data-tsd-kind="Class">Builder</a></li>
+						<li class="tsd-signature tsd-kind-icon">new<wbr>Builder<span class="tsd-signature-symbol">(</span>algorithm<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../classes/merkle.Builder.html" class="tsd-signature-type" data-tsd-kind="Class">Builder</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/SouthbankSoftware/provendb-sdk-node/blob/d18542e/src/merkle/merkle.ts#L82">src/merkle/merkle.ts:82</a></li>
+									<li>Defined in <a href="https://github.com/SouthbankSoftware/provendb-sdk-node/blob/13d2d2e/src/merkle/merkle.ts#L109">src/merkle/merkle.ts:109</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -244,7 +221,39 @@
 									</div>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <a href="../classes/merkle.builder.html" class="tsd-signature-type" data-tsd-kind="Class">Builder</a></h4>
+							<h4 class="tsd-returns-title">Returns <a href="../classes/merkle.Builder.html" class="tsd-signature-type" data-tsd-kind="Class">Builder</a></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-namespace">
+					<a name="validateProofWithCredentials" class="tsd-anchor"></a>
+					<h3>validate<wbr>Proof<wbr>With<wbr>Credentials</h3>
+					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-namespace">
+						<li class="tsd-signature tsd-kind-icon">validate<wbr>Proof<wbr>With<wbr>Credentials<span class="tsd-signature-symbol">(</span>credentials<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">ValidateProofOption</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/SouthbankSoftware/provendb-sdk-node/blob/13d2d2e/src/merkle/merkle.ts#L60">src/merkle/merkle.ts:60</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Credentials to pass when validating against external blockchain APIs.</p>
+								</div>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>credentials: <span class="tsd-signature-type">string</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<p>the credentials</p>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">ValidateProofOption</span></h4>
+							<p>the option</p>
 						</li>
 					</ul>
 				</section>
@@ -267,34 +276,37 @@
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
 					<li class=" tsd-kind-class tsd-parent-kind-namespace">
-						<a href="../classes/merkle.builder.html" class="tsd-kind-icon">Builder</a>
+						<a href="../classes/merkle.Builder.html" class="tsd-kind-icon">Builder</a>
 					</li>
 					<li class=" tsd-kind-class tsd-parent-kind-namespace">
-						<a href="../classes/merkle.tree.html" class="tsd-kind-icon">Tree</a>
+						<a href="../classes/merkle.Tree.html" class="tsd-kind-icon">Tree</a>
 					</li>
 					<li class=" tsd-kind-class tsd-parent-kind-namespace">
-						<a href="../classes/merkle.writer.html" class="tsd-kind-icon">Writer</a>
+						<a href="../classes/merkle.Writer.html" class="tsd-kind-icon">Writer</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-namespace">
-						<a href="../interfaces/merkle.file.html" class="tsd-kind-icon">File</a>
+						<a href="../interfaces/merkle.File.html" class="tsd-kind-icon">File</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-namespace">
-						<a href="../interfaces/merkle.leaf.html" class="tsd-kind-icon">Leaf</a>
+						<a href="../interfaces/merkle.Leaf.html" class="tsd-kind-icon">Leaf</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-namespace">
-						<a href="../interfaces/merkle.path.html" class="tsd-kind-icon">Path</a>
+						<a href="../interfaces/merkle.Path.html" class="tsd-kind-icon">Path</a>
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-namespace">
-						<a href="merkle.html#addpathtoproof" class="tsd-kind-icon">add<wbr>Path<wbr>ToProof</a>
+						<a href="merkle.html#build" class="tsd-kind-icon">build</a>
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-namespace">
-						<a href="merkle.html#importtree" class="tsd-kind-icon">import<wbr>Tree</a>
+						<a href="merkle.html#importTree" class="tsd-kind-icon">import<wbr>Tree</a>
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-namespace">
-						<a href="merkle.html#importtreesync" class="tsd-kind-icon">import<wbr>Tree<wbr>Sync</a>
+						<a href="merkle.html#importTreeSync" class="tsd-kind-icon">import<wbr>Tree<wbr>Sync</a>
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-namespace">
-						<a href="merkle.html#newbuilder" class="tsd-kind-icon">new<wbr>Builder</a>
+						<a href="merkle.html#newBuilder" class="tsd-kind-icon">new<wbr>Builder</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-namespace">
+						<a href="merkle.html#validateProofWithCredentials" class="tsd-kind-icon">validate<wbr>Proof<wbr>With<wbr>Credentials</a>
 					</li>
 				</ul>
 			</nav>

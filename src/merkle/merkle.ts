@@ -1,7 +1,8 @@
 import crypto from "crypto";
 import fs from "fs";
 import { anchor } from "..";
-import { addPathToProof } from "./proof";
+import https from "https";
+import { parse } from "chainpoint-parse";
 
 /**
  * Leaf represents a single leaf in a merkle tree.
@@ -33,9 +34,35 @@ export interface File {
     data: string[][];
 }
 
+/**
+ * Path interface for a merkle path of left and right values.
+ */
 export interface Path {
     l?: string;
     r?: string;
+}
+
+interface ValidateProofOptions {
+    credentials: string; // credentials for API calls.
+    isPath: boolean; // whether this is a path proof
+}
+
+/**
+ * Option type to pass to validateProof()
+ */
+type ValidateProofOption = (options: ValidateProofOptions) => void;
+
+/**
+ * Credentials to pass when validating against external blockchain APIs.
+ * @param credentials the credentials
+ * @returns the option
+ */
+export function validateProofWithCredentials(
+    credentials: string
+): ValidateProofOption {
+    return function (options: ValidateProofOptions) {
+        options.credentials = credentials;
+    };
 }
 
 /**
@@ -163,7 +190,7 @@ export class Tree {
      * @returns the leaf
      */
     getLeaf(key: string): Leaf | null {
-        let leaf = null;
+        let leaf: Leaf | null = null;
         this.layers[0].forEach((v) => {
             let l: Leaf = toLeaf(v);
             if (l.key === key) {
@@ -302,6 +329,146 @@ export class Tree {
     }
 
     /**
+     * Validates a proof against this tree by checking the tree's hash matches the proof hash,
+     * and validates the proof receipt matches the expected blockchain hash.
+     * @param proof the proof
+     * @param opts the options
+     * @returns true if valid, else false
+     */
+    validateProof(
+        proof: anchor.AnchorProof,
+        ...opts: ValidateProofOption[]
+    ): Promise<{ valid: boolean; message?: string }> {
+        return new Promise((res, rej) => {
+            // Set the options
+            let options: ValidateProofOptions = {
+                credentials: "",
+                isPath: false,
+            };
+            opts.forEach((o) => o(options));
+
+            // Ensure proof is CHP and validate it.
+            let format: anchor.Proof.Format = anchor.getProofFormat(
+                proof.format
+            );
+            if (
+                format === anchor.Proof.Format.ETH_TRIE ||
+                format === anchor.Proof.Format.ETH_TRIE_SIGNED
+            ) {
+                rej(new Error("proof format not supported"));
+                return;
+            }
+            // Parse the chainpoint proof.
+            let result: any;
+            try {
+                result = parse(proof.data);
+            } catch (e) {
+                rej(e);
+                return;
+            }
+
+            // Check that the proof hash data matches the generated tree hash
+            if (proof.hash !== this.getRoot()) {
+                res({
+                    valid: false,
+                    message: "proof hash and tree hash mismatch",
+                });
+                return;
+            }
+
+            // Get the expected blockchain hash
+            let branch = result.branches[0];
+            let exp: string;
+            while (true) {
+                if (branch.branches !== undefined) {
+                    branch = branch.branches[0];
+                } else {
+                    exp = branch.anchors[0]["expected_value"];
+                    break;
+                }
+            }
+
+            switch (anchor.getAnchorType(proof.anchorType)) {
+                case anchor.Anchor.Type.HEDERA:
+                    validateHederaTransaction(proof.metadata.txnId, exp, true)
+                        .then((r) => {
+                            res(r);
+                        })
+                        .catch((e) => {
+                            rej(e);
+                        });
+                    return;
+                case anchor.Anchor.Type.HEDERA_MAINNET:
+                    validateHederaTransaction(proof.metadata.txnId, exp, false)
+                        .then((r) => {
+                            res(r);
+                        })
+                        .catch((e) => {
+                            rej(e);
+                        });
+                    return;
+                case anchor.Anchor.Type.ETH:
+                    validateEthereumTransaction(proof.metadata.txnId, exp, true)
+                        .then((r) => {
+                            res(r);
+                        })
+                        .catch((e) => {
+                            rej(e);
+                        });
+                    return;
+                case anchor.Anchor.Type.ETH_MAINNET:
+                    validateEthereumTransaction(
+                        proof.metadata.txnId,
+                        exp,
+                        false
+                    )
+                        .then((r) => {
+                            res(r);
+                        })
+                        .catch((e) => {
+                            rej(e);
+                        });
+                    return;
+                case anchor.Anchor.Type.ETH_GOCHAIN:
+                    validateEthereumTransaction(
+                        proof.metadata.txnId,
+                        exp,
+                        false
+                    )
+                        .then((r) => {
+                            res(r);
+                        })
+                        .catch((e) => {
+                            rej(e);
+                        });
+                    return;
+                case anchor.Anchor.Type.ETH_ELASTOS:
+                    validateEthereumTransaction(
+                        proof.metadata.txnId,
+                        exp,
+                        false
+                    )
+                        .then((r) => {
+                            res(r);
+                        })
+                        .catch((e) => {
+                            rej(e);
+                        });
+                    return;
+                default:
+                    rej(
+                        new Error(
+                            "validation on '" +
+                                proof.anchorType +
+                                "' not supported"
+                        )
+                    );
+                    return;
+            }
+        });
+    }
+
+    /**
      * Verifies this tree by recalculating the root from all the layers.
      */
     verify(): boolean {
@@ -309,34 +476,10 @@ export class Tree {
         if (this.nodes === 0) {
             return true;
         }
-        let current: string[] = [];
-        let leaves = this.getLeaves();
-        leaves.forEach((l) => current.push(l.value));
-        let layer = [];
-        // Loop through until we have a single node i.e. root hash.
-        while (current.length > 1) {
-            // Loop through the nodes with increments of 2 (pairs)
-            for (let i = 0; i < current.length; i += 2) {
-                // If we have an odd node, we promote it.
-                if (i + 1 === current.length) {
-                    layer.push(current[i]);
-                } else {
-                    let hash = crypto
-                        .createHash(this.algorithm)
-                        .update(
-                            Buffer.concat([
-                                Buffer.from(current[i], "hex"),
-                                Buffer.from(current[i + 1], "hex"),
-                            ])
-                        )
-                        .digest("hex");
-                    layer.push(hash);
-                }
-            }
-            current = layer;
-            layer = [];
-        }
-        return current[0] === this.getRoot();
+        let leaves: string[] = [];
+        this.getLeaves().forEach((l) => leaves.push(l.value));
+        let layers: string[][] = build(leaves, this.algorithm);
+        return layers[layers.length - 1][0] === this.getRoot();
     }
 }
 
@@ -367,11 +510,10 @@ export class Writer {
  * A builder to dynamically construct a new Merkle tree.
  */
 export class Builder {
-    private layers: string[][] = [];
+    private leaves: string[] = [];
 
     constructor(private algorithm: string) {
         validateAlgorithm(algorithm);
-        this.layers.push([]);
     }
     /**
      * Adds a single leaf to the tree.
@@ -379,7 +521,7 @@ export class Builder {
      * @param value the value
      */
     add(key: string, value: Buffer): Builder {
-        this.layers[0].push(key + ":" + this.createHash(value));
+        this.leaves.push(key + ":" + createHash(value, this.algorithm));
         return this;
     }
 
@@ -400,7 +542,7 @@ export class Builder {
      */
     writeStream(key: string): Writer {
         return new Writer(this.algorithm, key, (key: string, hex: string) => {
-            this.layers[0].push(key + ":" + hex);
+            this.leaves.push(key + ":" + hex);
         });
     }
 
@@ -416,62 +558,74 @@ export class Builder {
      */
     build(): Tree {
         // Perform some validation
-        if (this.layers[0].length === 0) {
+        if (this.leaves.length === 0) {
             throw new Error("a tree must contain at least 1 leaf");
         }
         // Build the tree only if there is more than one leaf.
-        if (this.layers[0].length > 1) {
-            this._build(this.layers[0]);
+        if (this.leaves.length > 1) {
+            return new Tree(this.algorithm, build(this.leaves, this.algorithm));
         }
-        return new Tree(this.algorithm, this.layers);
+        return new Tree(this.algorithm, [this.leaves]);
     }
+}
 
-    private _build(nodes: string[]) {
-        // Loop through until we have a single node i.e. root hash.
-        while (nodes.length > 1) {
-            // Get the index of the next level and push an empty array.
-            let layerIndex = this.layers.length;
-            this.layers.push([]);
-            // Loop through the nodes with increments of 2 (pairs)
-            for (let i = 0; i < nodes.length; i += 2) {
-                // If we have an odd node, we promote it.
-                if (i + 1 === nodes.length) {
-                    let s: string = nodes[i];
-                    if (nodes[i].includes(":")) {
-                        s = nodes[i].split(":")[1];
-                    }
-                    this.layers[layerIndex].push(s);
-                } else {
-                    // If at least one node includes a key, split both.
-                    let s1: string = nodes[i];
-                    let s2: string = nodes[i + 1];
-                    if (nodes[i].includes(":")) {
-                        s1 = nodes[i].split(":")[1];
-                        s2 = nodes[i + 1].split(":")[1];
-                    }
-                    var hash = this.createHash(
-                        Buffer.concat([
-                            Buffer.from(s1, "hex"),
-                            Buffer.from(s2, "hex"),
-                        ])
-                    );
-                    this.layers[layerIndex].push(hash);
+/**
+ * Builds a merkle tree based on the initial leaf values.
+ * @param data the leaves
+ * @returns the built tree
+ */
+export function build(leaves: string[], algorithm: string): string[][] {
+    let layers: string[][] = [];
+    // Push the leaf layer and assign first node layer
+    layers.push(leaves);
+    let nodes: string[] = leaves;
+
+    // Loop through until we have a single node i.e. root hash.
+    while (nodes.length > 1) {
+        // Get the index of the next level and push an empty array.
+        let layerIndex = layers.length;
+        layers.push([]);
+        // Loop through the nodes with increments of 2 (pairs)
+        for (let i = 0; i < nodes.length; i += 2) {
+            // If we have an odd node, we promote it.
+            if (i + 1 === nodes.length) {
+                let s: string = nodes[i];
+                if (nodes[i].includes(":")) {
+                    s = nodes[i].split(":")[1];
                 }
+                layers[layerIndex].push(s);
+            } else {
+                // If at least one node includes a key, split both.
+                let s1: string = nodes[i];
+                let s2: string = nodes[i + 1];
+                if (nodes[i].includes(":")) {
+                    s1 = nodes[i].split(":")[1];
+                    s2 = nodes[i + 1].split(":")[1];
+                }
+                var hash = createHash(
+                    Buffer.concat([
+                        Buffer.from(s1, "hex"),
+                        Buffer.from(s2, "hex"),
+                    ]),
+                    algorithm
+                );
+                layers[layerIndex].push(hash);
             }
-            nodes = this.layers[layerIndex];
         }
+        nodes = layers[layerIndex];
     }
+    return layers;
+}
 
-    /**
-     * Creates a hash of the data.
-     * @param data the data to hash.
-     */
-    private createHash(data: Buffer): string {
-        return crypto
-            .createHash(normalizeAlgorithm(this.algorithm))
-            .update(data)
-            .digest("hex");
-    }
+/**
+ * Creates a hash of the data.
+ * @param data the data to hash.
+ */
+function createHash(data: Buffer, algorithm: string): string {
+    return crypto
+        .createHash(normalizeAlgorithm(algorithm))
+        .update(data)
+        .digest("hex");
 }
 
 function validateAlgorithm(algorithm: string) {
@@ -494,4 +648,149 @@ function normalizeAlgorithm(algorithm: string) {
         default:
             throw new Error("algorithm '" + algorithm + "' not supported");
     }
+}
+
+/**
+ * Adds a merkle path to an existing proof.
+ *
+ * @param proof the proof to add the path to
+ * @param hash the hash the path begins at
+ * @param algorithm the algorithm used to construct the path
+ * @param path the path to add
+ * @param label the label (description)
+ * @returns the updated proof
+ */
+function addPathToProof(
+    proof: anchor.AnchorProof,
+    hash: string,
+    algorithm: string,
+    path: Path[],
+    label?: string
+): anchor.AnchorProof {
+    switch (proof.format) {
+        case "CHP_PATH":
+            return addPathCHP(proof, hash, algorithm, path, label);
+        case "CHP_PATH_SIGNED":
+            return addPathCHP(proof, hash, algorithm, path, label);
+        default:
+            throw new Error("proof format not supported");
+    }
+}
+
+function addPathCHP(
+    proof: anchor.AnchorProof,
+    hash: string,
+    algorithm: string,
+    path: Path[],
+    label?: string
+): anchor.AnchorProof {
+    // Create new path branch
+    let p: any = Object.assign({}, proof.data);
+    let branch: any = {
+        label: label,
+        ops: [],
+        branches: p.branches,
+    };
+    // Loop through each path element and create a CHP path.
+    for (let i = 0; i < path.length; i++) {
+        let value: any = {
+            l: path[i].l,
+            r: path[i].r,
+        };
+        branch.ops.push(value);
+        branch.ops.push({ op: algorithm });
+    }
+    // Add the new branch with nested branches.
+    p.hash = hash;
+    p.branches = [branch];
+    return {
+        id: proof.id,
+        anchorType: proof.anchorType,
+        batchId: proof.batchId,
+        status: proof.status,
+        hash: hash,
+        format: proof.format,
+        metadata: proof.metadata,
+        data: p,
+    };
+}
+
+/**
+ * Retrieves Hedera transaction directly from Kabuto.
+ * @param id the transaction ID.
+ * @param testnet whether the transaction is from the testnet
+ */
+function validateHederaTransaction(
+    txnId: string,
+    expected: string,
+    testnet: boolean
+): Promise<{ valid: boolean; message?: string }> {
+    return new Promise((res, rej) => {
+        const options = {
+            hostname: testnet ? "api.testnet.kabuto.sh" : "api.kabuto.sh",
+            port: 443,
+            path: "/v1/transaction/" + txnId,
+            method: "GET",
+        };
+        const req = https.get(options, (r) => {
+            let body = "";
+            r.on("data", (d) => {
+                body += d;
+            });
+            r.on("end", () => {
+                let json = JSON.parse(body);
+                // Validate the memo field against the hash.
+                if (json.memo !== expected) {
+                    res({
+                        valid: false,
+                        message: "expected hash and blockchain hash mismatch",
+                    });
+                } else {
+                    res({ valid: true });
+                }
+            });
+            r.on("error", (e) => {
+                rej(e);
+            });
+        });
+    });
+}
+
+function validateEthereumTransaction(
+    txnId: string,
+    expected: string,
+    testnet: boolean
+): Promise<{ valid: boolean; message?: string }> {
+    return new Promise((res, rej) => {
+        const options = {
+            hostname: testnet ? "api-rinkeby.etherscan.io" : "api.etherscan.io",
+            port: 443,
+            path:
+                "/api?module=proxy&action=eth_getTransactionByHash&txhash=0x" +
+                txnId +
+                "&apikey=PPAP7QM5JTQZBD5BDNUD7VMS4RB3DJWTDV",
+            method: "GET",
+        };
+        const req = https.get(options, (r) => {
+            let body = "";
+            r.on("data", (d) => {
+                body += d;
+            });
+            r.on("end", () => {
+                let json = JSON.parse(body);
+                // Validate the txn input with expected
+                if (json.result.input !== "0x" + expected) {
+                    res({
+                        valid: false,
+                        message: "expected hash and blockchain hash mismatch",
+                    });
+                } else {
+                    res({ valid: true });
+                }
+            });
+            r.on("error", (e) => {
+                rej(e);
+            });
+        });
+    });
 }
