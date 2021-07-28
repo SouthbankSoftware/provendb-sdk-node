@@ -246,7 +246,7 @@ A proof with the path should look like the following:
 
 Once you have a confirmed proof, it can be validated independently of ProvenDB using `validateProof()`.
 
-To validate, simply build a new a tree object of the data you expect to be validated and provide that proof
+To validate, simply build a new a tree object of the data you expect to be validated and provide a proof
 that the data is to be validated against.
 
 ```js
