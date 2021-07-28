@@ -182,6 +182,84 @@ const HEDERA_MAINNET_PROOF_PATH = {
     }
 }
 
+// This is an invalid path
+const HEDERA_MAINNET_INVALID_PROOF_PATH = {
+    "id": "5486677cd239f0bde3a0bf517fef8de3cc04e75731be77642b30b6671833c76d:JSDsynnzHWw1HY6Qr_YlU",
+    "anchorType": "HEDERA_MAINNET",
+    "batchId": "JSDsynnzHWw1HY6Qr_YlU",
+    "status": "CONFIRMED",
+    "hash": "2e7d2c03a9507ae265ecf5b5356885a53393a2029d241394997265a1a25aefc6",
+    "format": "CHP_PATH",
+    "metadata": {
+        "txnId": "d273f4b9d4c415475f9e7676d36767aa74467c4b21df2e8464962901e5ebd2c2776048525cf288274e3bf81a64730d44",
+        "txnUri": "https://app.dragonglass.me/hedera/search?q=d273f4b9d4c415475f9e7676d36767aa74467c4b21df2e8464962901e5ebd2c2776048525cf288274e3bf81a64730d44",
+        "blockTime": 1627338310,
+        "blockTimeNano": 914105000,
+        "validStart": "2021-07-26T22:25:00.069025724Z",
+        "operator": "0.0.44034",
+        "transactionFee": 53631,
+        "confirmedByMirror": true
+    },
+    "data": {
+        "@context": "https://w3id.org/chainpoint/v3",
+        "type": "Chainpoint",
+        "hash": "2e7d2c03a9507ae265ecf5b5356885a53393a2029d241394997265a1a25aefc6",
+        "hash_id_node": "da023c5c-c895-11e9-a32f-2a2ae2dbcce4",
+        "hash_submitted_node_at": "2021-07-26T22:25:09Z",
+        "hash_id_core": "da023c5c-c895-11e9-a32f-2a2ae2dbcce4",
+        "hash_submitted_core_at": "2021-07-26T22:25:09Z",
+        "branches": [
+            {
+                "label": "c_path",
+                "ops": [
+                    {
+                        "r": "18ac3e7343f016890c510e93f935261169d9e3f565436429830faf0934f4f8e4"
+                    },
+                    {
+                        "op": "sha-256"
+                    },
+                    {
+                        "l": "e5a01fee14e0ed5c48714f22180f25ad8365b53f9779f79dc4a3d7e93963f94a"
+                    },
+                    {
+                        "op": "sha-256"
+                    },
+                    {
+                        "r": "8e2c530a100033894555cde1c7d4e36f7c6e553ee3914022ec7a13e1196baed5"
+                    },
+                    {
+                        "op": "sha-256"
+                    },
+                    {
+                        "r": "6eeb6ef56df316c559cc627dd31358ce494fed3db575668ad93e4e4102d5025e"
+                    },
+                    {
+                        "op": "sha-256"
+                    }
+                ],
+                "branches": [
+                    {
+                        "label": "pdb_hedera_mainnet_anchor_branch",
+                        "ops": [
+                            {
+                                "anchors": [
+                                    {
+                                        "type": "cal",
+                                        "anchor_id": "d273f4b9d4c415475f9e7676d36767aa74467c4b21df2e8464962901e5ebd2c2776048525cf288274e3bf81a64730d44",
+                                        "uris": [
+                                            "https://anchor.proofable.io/verify/hedera_mainnet/d273f4b9d4c415475f9e7676d36767aa74467c4b21df2e8464962901e5ebd2c2776048525cf288274e3bf81a64730d44"
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}
+
 const HEDERA_TESTNET_PROOF = {
     "id": "5486677cd239f0bde3a0bf517fef8de3cc04e75731be77642b30b6671833c76d:WTiZz6rj16oQtCE8icszp",
     "anchorType": "HEDERA",
@@ -846,7 +924,7 @@ describe("Test Tree", () => {
         await expect(tree.validateProof(ETHEREUM_TESTNET_PROOF_PATH)).resolves.toMatchObject({ valid: true });
     })
 
-    it("Should NOT validate multi proof", async() => {
+    it("Should NOT validate proof and hash mismatch", async() => {
         let tree = newBuilder("sha-256").addBatch([
             { key: "a", value: Buffer.from("a") },
             { key: "b", value: Buffer.from("b") },
@@ -867,5 +945,13 @@ describe("Test Tree", () => {
         let p = HEDERA_MAINNET_PROOF
         p.hash = "mismatch";
         await expect(tree.validateProof(p)).resolves.toMatchObject({ valid: false, message: "proof hash and tree hash mismatch" });
+    })
+
+    it("Should NOT validate receipt hash and blockchain hash mismatch", async() => {
+        let tree = newBuilder("sha-256").addBatch([
+            { key: "c", value: Buffer.from("c") },
+        ]).build();
+        let p = HEDERA_MAINNET_INVALID_PROOF_PATH
+        await expect(tree.validateProof(p)).resolves.toMatchObject({ valid: false, message: "expected hash and blockchain hash mismatch" });
     })
 });

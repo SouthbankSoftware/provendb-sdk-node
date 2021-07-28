@@ -24,6 +24,9 @@ export interface File {
      */
     data: string[][];
 }
+/**
+ * Path interface for a merkle path of left and right values.
+ */
 export interface Path {
     l?: string;
     r?: string;
@@ -32,9 +35,16 @@ interface ValidateProofOptions {
     credentials: string;
     isPath: boolean;
 }
-export declare type ValidateProofOption = (options: ValidateProofOptions) => void;
+/**
+ * Option type to pass to validateProof()
+ */
+declare type ValidateProofOption = (options: ValidateProofOptions) => void;
+/**
+ * Credentials to pass when validating against external blockchain APIs.
+ * @param credentials the credentials
+ * @returns the option
+ */
 export declare function validateProofWithCredentials(credentials: string): ValidateProofOption;
-export declare function validateProofWithPath(isPath: boolean): ValidateProofOption;
 /**
  * Imports the given merkle file.
  * @param file the merkle file
@@ -134,8 +144,8 @@ export declare class Tree {
      */
     nNodes(): number;
     /**
-     * Validates the proof by calculating a root hash from the leaves provided, checking it matches the proof's hash,
-     * and validates the proof data with the expected blockchain hash.
+     * Validates a proof against this tree by checking the tree's hash matches the proof hash,
+     * and validates the proof receipt matches the expected blockchain hash.
      * @param proof the proof
      * @param opts the options
      * @returns true if valid, else false
